@@ -1,0 +1,48 @@
+global:
+  project_name: "Senegal_2020"
+  verbose: true
+  log_file: "logs/pipeline.log"
+
+
+cdsapi:
+  url:  https://cds.climate.copernicus.eu/api
+  key: eefa1294-a46c-4e78-9e53-bdb7f43dfe7d #470898de-e29d-4b2b-a372-c9cf6a7206c2 #<Your API key here.
+  uid: 9714cb86-97ff-4c2d-87b0-fa733f1216f0 #<Your UID here>
+  verify: 1
+
+esgf:
+  username: your_username
+  password: your_password
+
+# projections:
+#   source: "CMIP6"
+#   models: ["FGOALS-g3"]
+#   variables: ["pr"]
+#   scenarios: ["historical"]
+#   output_dir: "data/projections/cmip6"
+#   bbox: [-17.6, 12.22, -11.21, 16.8] # lon_min, lat_min, lon_max, lat_max
+#   start: 1981
+
+
+climate:
+   source: cds
+   product: era5
+   start_date: "2020-01-01"
+   end_date: "2020-02-29"
+   variables: ["T2M", "WS2M"]
+   bbox: [-17.0, 8.0, -14.0, 11.0] # lon_min, lat_min, lon_max, lat_max
+   resolution: 0.5
+   output_dir: "data/climate/era5"
+    # source: chirps
+    # start_date: "2020-01-01"
+    # end_date: "2020-12-31"
+    # variables: ["PR"]
+    # output_dir: "data/climate/chirps"
+
+# soil:
+#   source: soilgrids
+#   depth_layers: ["0-5cm", "5-15cm"]
+#   variables: ["clay", "sand", "ocd"]
+#   bbox: [-17.0, 10.0, -16.0, 11.0]
+#   resolution: 250
+#   output_dir: "data/soil/soilgrids"

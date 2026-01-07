@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agrometflow"
+version = "0.1.0"
+description = "Automated download and processing of climate and soil data for soil-plant-atmosphere modeling"
+readme = "README.rst"
+license = {text = "MIT"}
+authors = [{name = "Cyrille Midingoyi", email = "cyrille_ahmed.midingoyi@cirad.fr"}]
+requires-python = ">=3.9"
+dependencies = [
+    "requests",
+    "pandas",
+    "xarray",
+    "numpy",
+    "geopandas",
+    "rioxarray",
+    "tqdm",
+    "cdsapi",
+    "pyyaml",
+    "esgf-pyclient",
+    "matplotlib",
+    "h5netcdf",
+    "h5py",
+    "libnetcdf",
+    "dask"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/CropModelingPlatform/agrometflow"
+"Documentation" = "https://agrometflow.readthedocs.io/en/latest/"
+
