@@ -11,8 +11,23 @@ import os
 import tempfile
 from pathlib import Path
 
-# Disable tqdm notebook mode to avoid issues in Binder/remote environments
+# Disable tqdm completely to avoid issues in Binder/remote environments
+os.environ["TQDM_DISABLE"] = "1"
 os.environ["TQDM_NOTEBOOK_DISABLE"] = "1"
+
+def _is_notebook_environment():
+    """Check if running in a Jupyter notebook or Binder environment."""
+    try:
+        from IPython import get_ipython
+        shell = get_ipython().__class__.__name__
+        if shell == 'ZMQInteractiveShell':
+            return True  # Jupyter notebook or qtconsole
+        elif shell == 'TerminalInteractiveShell':
+            return False  # Terminal running IPython
+        else:
+            return False
+    except (NameError, AttributeError):
+        return False
 
 class CDSDownloader(ClimateSource):
     def __init__(self, log_file=None, verbose=False):
@@ -55,16 +70,29 @@ class CDSDownloader(ClimateSource):
 
         self.logger.info(f"Downloading {product} data for {variables} from {start_year} to {end_year}")
         self.logger.info(f"BBOX: {bbox}, Dataset: {dataset}")
-        self.client = cdsapi.Client(kwargs["url"], kwargs["key"],quiet=True)
+        
+        # Get CDS credentials
+        cds_url = kwargs.get("url", os.environ.get("CDS_URL", "https://cds.climate.copernicus.eu/api"))
+        cds_key = kwargs.get("key", os.environ.get("CDS_KEY"))
+        
+        self.client = cdsapi.Client(cds_url, cds_key, quiet=True)
 
         # Parallel download per year
-        max_workers = kwargs.get("max_workers", 4)
-        self.logger.info(f"Max workers: {max_workers}")
+        # Disable parallelism in notebook environments to avoid tqdm conflicts
+        is_notebook = _is_notebook_environment()
+        max_workers = 1 if is_notebook else kwargs.get("max_workers", 4)
+        self.logger.info(f"Max workers: {max_workers} (notebook mode: {is_notebook})")
         
         requests = build_requests(variables, years, output_dir, bbox)
         self.logger.info(f"Requests: {requests}")
-        with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            executor.map(lambda req: fetch_and_merge(req, self.client, self.logger, dataset), requests)
+        
+        if max_workers == 1:
+            # Sequential download for notebook environments
+            for req in requests:
+                fetch_and_merge(req, self.client, self.logger, dataset)
+        else:
+            with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                executor.map(lambda req: fetch_and_merge(req, self.client, self.logger, dataset), requests)
 
     def extract(self, variables=None, start_date=None, end_date=None, as_long=False, **kwargs):
         return super().extract(variables, start_date, end_date, as_long, **kwargs)
