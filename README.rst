@@ -2,6 +2,10 @@
 agrometflow
 ===========
 
+.. image:: https://mybinder.org/badge_logo.svg
+   :target: https://mybinder.org/v2/gh/CropModelingPlatform/agrometflow/HEAD?labpath=notebooks%2Fpipeline.ipynb
+   :alt: Launch Binder
+
 A Python package for automated download and processing of climate and soil data
 for soil-plant-atmosphere modeling workflows.
 
