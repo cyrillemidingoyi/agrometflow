@@ -11,6 +11,9 @@ import os
 import tempfile
 from pathlib import Path
 
+# Disable tqdm notebook mode to avoid issues in Binder/remote environments
+os.environ["TQDM_NOTEBOOK_DISABLE"] = "1"
+
 class CDSDownloader(ClimateSource):
     def __init__(self, log_file=None, verbose=False):
         self.logger = get_logger(__name__, log_file=log_file, verbose=verbose)

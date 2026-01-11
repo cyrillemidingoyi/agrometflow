@@ -1,4 +1,8 @@
 #!/bin/bash
 # Post-build script for Binder
+
+# Enable ipywidgets for tqdm progress bars
+jupyter nbextension enable --py widgetsnbextension --sys-prefix
+
 # Install the package from the repository root
 pip install -e .

@@ -5,7 +5,7 @@ xarray
 numpy
 geopandas
 rioxarray
-tqdm
+tqdm>=4.66.0
 cdsapi
 pyyaml
 esgf-pyclient
@@ -14,3 +14,4 @@ h5netcdf
 h5py
 dask
 netCDF4
+ipywidgets>=8.0.0
