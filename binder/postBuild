@@ -1,3 +1,4 @@
 #!/bin/bash
 # Post-build script for Binder
+# Install the package from the repository root
 pip install -e .

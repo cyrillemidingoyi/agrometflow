@@ -14,6 +14,3 @@ h5netcdf
 h5py
 dask
 netCDF4
-
-# Install the local package
--e ..
