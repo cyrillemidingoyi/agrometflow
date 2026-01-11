@@ -64,8 +64,11 @@ class CMIP6Downloader:
                 ds = change_lon(ds) #ds.assign_coords(lon=(((ds.lon + 180) % 360) - 180))
                 #ds = ds.sortby("lon")
                 self.logger.info(f"[INFO] Corrected longitude for {path.name}")
-            # Clip dataset if bbox is given
-            print("iiiiiiiiiiiiiiiiiiiiiiiiiiii", "time" in ds.variables, "lon" in ds.variables)
+            
+            # Apply conversions
+            ds = apply_unit_conversions(ds, variable)
+            self.logger.info(f"[INFO] Applied unit conversions for {path.name}, variable: {variable}")
+            
             if bbox:
                 self.logger.info(f"[INFO] Clipping process {path.name} to bbox: {bbox}")
                 lat_min, lat_max, lon_min, lon_max = bbox[1], bbox[3], bbox[0], bbox[2]
@@ -76,15 +79,14 @@ class CMIP6Downloader:
                 self.logger.info(f"[INFO] Clipped dataset {path.name} to bbox: {bbox}")
             elif points:
                 self.logger.info(f"[INFO] Subsetting process {path.name} to points: {points}")
-                ds_pts = extract_points_from_tuples(ds, points)   # ✅ NEW
-                self.export_points_csv_by_year(ds_pts, path, output_dir, variable)  # ✅ NEW
-                os.remove(path)  # on supprime le nc d’origine (comme tu fais déjà)
+                ds_pts = extract_points_from_tuples(ds, points)  
+                self.export_points_csv_by_year(ds_pts, path, output_dir, variable) 
+                os.remove(path) 
                 self.logger.info(f"[INFO] Subsetted dataset {path.name} to points: {points}")
                 return
                 
-            # Overwrite clipped version
             self.split_netcdf_by_year(ds, path, output_dir)
-            #ds.to_netcdf(path)
+            ds.to_netcdf(path)
             self.logger.debug(f"[CLIP] Applied clipping & lon correction to {path.name}")
         except Exception as e:
             self.logger.error(f"[ERROR] Failed to clip/correct {path.name}: {e}")
@@ -137,7 +139,7 @@ class CMIP6Downloader:
             for scenario in experiments:
                 scenario_dir = os.path.join(output_dir, model, scenario)
                 Path(scenario_dir).mkdir(parents=True, exist_ok=True)
-                tmp_dir = os.path.join(scenario_dir, "_tmp_vars")   # temporaires par variable
+                tmp_dir = os.path.join(scenario_dir, "_tmp_vars")  
                 Path(tmp_dir).mkdir(parents=True, exist_ok=True)
                 for variable in variables:
                     self.logger.info(f"Modèle : {model},Scenario : {scenario},  Variable : {variable}")
@@ -145,13 +147,12 @@ class CMIP6Downloader:
                     Path(var_dir).mkdir(parents=True, exist_ok=True)
                     results = self.search(variable, scenario, model)
                     self._download_files(results, var_dir, bbox, points, start_year, variable)
-                    #self._merge_by_year(files, variable, var_dir)
-                    #all_downloaded.extend(files)
+
         if points:
             self.merge_points_csvs_by_year(tmp_dir, scenario_dir, variables)
 
         import shutil
-        #shutil.rmtree(tmp_dir, ignore_errors=True)
+        shutil.rmtree(tmp_dir, ignore_errors=True)
         return all_downloaded
 
     def _extract_url_and_path(self, file, output_dir):
@@ -188,7 +189,6 @@ class CMIP6Downloader:
                     downloaded.append(result)
             self.logger.info(f" {len(downloaded)} fichiers téléchargés pour cette variable.")
 
-            # Now apply post-processing in parallel: clip + correct lon
             self.logger.info(f"[INFO] Applying spatial clipping and lon correction...")
             with ThreadPoolExecutor(max_workers=max_workers) as executor:
                 executor.map(lambda f: self._correct_and_subset(f, bbox, points, output_dir, variable), downloaded)  
@@ -232,11 +232,13 @@ class CMIP6Downloader:
         """
         if "time" not in ds_pts.coords:
             raise ValueError("Dataset has no 'time' coordinate; cannot export CSV.")
-
-        #ds_pts = ds_pts[[variable]].squeeze(drop=True)
         
-        base = Path(nc_path).stem  # nom du fichier sans .nc
+        base = Path(nc_path).stem 
         years = np.unique(ds_pts.time.dt.year.values)
+        
+        ds_pts = ds_pts.drop_vars("time_bounds", errors="ignore")
+        ds_pts["time"].attrs.pop("bounds", None)
+        ds_pts = ds_pts.drop_dims("axis_nbounds", errors="ignore")
 
         for year in years:
             ds_y = ds_pts.sel(time=ds_pts.time.dt.year == int(year))
@@ -248,9 +250,6 @@ class CMIP6Downloader:
             # time YYYYMMDD
             df["time"] = pd.to_datetime(df["time"]).dt.strftime("%Y%m%d")
             
-            #self.logger.info(f"tableauuuuuuuuu {df}")
-
-            # colonnes strictes
             df = df[["time", "lon", "lat", variable]]
 
             out_path = Path(out_dir) / f"{base}_points_{int(year)}.csv"
@@ -268,18 +267,17 @@ class CMIP6Downloader:
         scenario_dir = Path(scenario_dir)
         scenario_dir.mkdir(parents=True, exist_ok=True)
 
-        # indexer les fichiers par "clé commune" = base_points_YYYY.csv
         files_by_key = {}
 
         for var in variables:
-            for p in Path(os.path.join(tmp_dir, var)).glob(f"*_.csv"):
-                # get the year frome the filename terminated by year.csv
+            for p in Path(os.path.join(tmp_dir, var)).glob(f"*.csv"):
                 match = re.search(r"_(\d{4})\.csv$", p.name)
                 if not match:
                     continue
                 key = match.group(1)
                 files_by_key.setdefault(key, []).append(p)
-
+        
+        self.logger.info(f"Merging CSVs by year for points... {len(files_by_key)} years found.")
         for key, paths in files_by_key.items():
             df_merged = None
 
@@ -298,7 +296,6 @@ class CMIP6Downloader:
             if df_merged is None or df_merged.empty:
                 continue
 
-            # ordre final strict
             cols = ["time", "lon", "lat"] + [v for v in variables if v in df_merged.columns]
             df_merged = df_merged[cols]
 
@@ -369,16 +366,29 @@ def clip_data(df, bbox):
     df = df.sel(lon=slice(bbox[0],bbox[2]),lat=slice(bbox[1],bbox[3]))
     return df
 
-def change_precip_units(df):
-    if 'pr' in df.variables:
-        df['pr'] = df['pr'] * 86400  # Convert from kg/m²/s to mm/day
-        df['pr'].attrs['units'] = 'mm/day'
-    return df
+def change_precip_units(ds, var):
+    if var == "pr":
+        ds[var] = ds[var] * 86400  # Convert from kg/m²/s to mm/day
+        ds[var].attrs['units'] = 'mm/day'
+    return ds
 
-def convert_temp_units(df):
-    if 'tas' in df.variables:
-        df['tas'] = df['tas'] - 273.15  # Convert from Kelvin to Celsius
-        df['tas'].attrs['units'] = '°C'
-    return df
+def convert_temp_units(ds, var):
+    if var in ["tas", "tasmax", "tasmin"]:
+        ds[var] = ds[var] - 273.15  # Convert from Kelvin to Celsius
+        ds[var].attrs['units'] = '°C'
+    return ds
 
+def convert_wind_to_2meters(ds, var):
+    if var in ["sfcWind", "uas", "vas"]:
+        ds[var] = ds[var] * 0.75 
+        ds[var].attrs['units'] = 'm/s at 2m'
+        ds[var].attrs["comment"] = "Scaled to 2m using constant factor 0.75 (approx)."
+    return ds
+
+
+def apply_unit_conversions(ds, var):
+    ds = change_precip_units(ds, var)
+    ds = convert_temp_units(ds, var)
+    ds = convert_wind_to_2meters(ds, var)
+    return ds
 
