@@ -24,7 +24,8 @@ dependencies = [
     "matplotlib",
     "h5netcdf",
     "h5py",
-    "libnetcdf",
+    "netCDF4",
+    "scipy",
     "dask"
 ]
 
