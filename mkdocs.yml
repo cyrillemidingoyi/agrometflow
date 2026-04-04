@@ -1,0 +1,57 @@
+site_name: "Formation agrometflow – Cameroon"
+site_description: "Support de formation : sources de données climatiques et contrôle qualité avec agrometflow"
+site_author: "Cyrille Midingoyi"
+site_url: "https://cropmodelingplatform.github.io/agrometflow/"
+
+repo_url: "https://github.com/CropModelingPlatform/agrometflow"
+repo_name: "CropModelingPlatform/agrometflow"
+
+theme:
+  name: material
+  language: fr
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: teal
+      accent: amber
+      toggle:
+        icon: material/brightness-7
+        name: Mode sombre
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: teal
+      accent: amber
+      toggle:
+        icon: material/brightness-4
+        name: Mode clair
+  features:
+    - navigation.instant
+    - navigation.sections
+    - navigation.top
+    - toc.integrate
+    - content.code.copy
+  icon:
+    repo: fontawesome/brands/github
+
+nav:
+  - Accueil: index.md
+  - Sources de données: sources.md
+  - Contrôle qualité: controle-qualite.md
+  - Notebooks: notebooks.md
+  - "Annexe – RFE & ARC2": rfe-arc2.md
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - tables
+  - toc:
+      permalink: true
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/CropModelingPlatform/agrometflow

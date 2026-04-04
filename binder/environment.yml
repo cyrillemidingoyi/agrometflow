@@ -1,26 +1,15 @@
 name: agrometflow
 channels:
   - conda-forge
-  - defaults
 dependencies:
   - python=3.10
-  - requests
-  - pandas
-  - xarray
   - numpy
-  - geopandas
-  - rioxarray
+  - pandas
+  - requests
   - tqdm
-  - cdsapi
   - pyyaml
   - matplotlib
-  - h5netcdf
-  - h5py
-  - dask
-  - netcdf4
   - scipy
   - ipywidgets
   - jupyterlab
   - pip
-  - pip:
-    - esgf-pyclient

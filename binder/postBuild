@@ -4,5 +4,7 @@
 # Enable ipywidgets for tqdm progress bars
 jupyter nbextension enable --py widgetsnbextension --sys-prefix
 
-# Install the package from the repository root
-pip install -e .
+# Install the package from the repository root without re-resolving
+# the full project dependency set. The Binder image is intentionally
+# slimmed down for the training notebooks.
+pip install -e . --no-deps
