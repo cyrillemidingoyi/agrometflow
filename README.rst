@@ -16,6 +16,17 @@ Features
 - Modular structure for easy integration of new sources
 - Automated pipeline for preprocessing (extraction, resampling, etc.)
 
+Training Material
+-----------------
+
+- GitHub Pages support: ``docs/index.html``
+- Training notebooks: ``notebooks/formation_cameroon/``
+- Binder classroom entrypoint:
+
+.. code-block:: text
+
+   https://mybinder.org/v2/gh/cyrillemidingoyi/agrometflow/HEAD?urlpath=lab/tree/notebooks/formation_cameroon
+
 Install
 -------
 

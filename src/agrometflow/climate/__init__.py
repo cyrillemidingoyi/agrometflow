@@ -1,4 +1,5 @@
 from agrometflow.climate.power import PowerDownloader
+from agrometflow.climate.ghcnd import GHCNDDownloader
 from agrometflow.climate.cds import CDSDownloader
 from agrometflow.climate.chirps import ChirpsDownloader  # si besoin
 from agrometflow.climate.tamsat import TamsatDownloader
@@ -41,5 +42,7 @@ def get_climate_source(source_name, **kwargs):
         return Cmorphv1Downloader(**kwargs)
     elif source_name == "rfe2":
         return Rfe2Downloader(**kwargs)
+    elif source_name == "ghcnd":
+        return GHCNDDownloader(**kwargs)
     else:
         raise ValueError(f"Unknown climate source: '{source_name}'")

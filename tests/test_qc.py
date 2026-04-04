@@ -5,7 +5,13 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from agrometflow.dataquality.qc import climatic_outliers, run_qc_pipeline_from_config
+from agrometflow.dataquality.qc import (
+    check_units,
+    climatic_outliers,
+    run_qc_pipeline_from_config,
+    wmo_gross_errors,
+    wmo_time_consistency,
+)
 
 
 class TestQcPipelineFromConfig(unittest.TestCase):
@@ -97,6 +103,176 @@ class TestQcPipelineFromConfig(unittest.TestCase):
             self.assertTrue(out_pdf.exists())
             self.assertGreater(out_pdf.stat().st_size, 0)
             self.assertIsInstance(out, pd.DataFrame)
+
+    def test_climatic_outliers_filters_single_station_id_without_station_col(self):
+        dates = pd.date_range("2015-01-01", "2019-12-31", freq="D")
+        station_a = pd.DataFrame(
+            {
+                "station": "A",
+                "Year": dates.year,
+                "Month": dates.month,
+                "Day": dates.day,
+                "rr": 1.0,
+            }
+        )
+        station_b = pd.DataFrame(
+            {
+                "station": "B",
+                "Year": dates.year,
+                "Month": dates.month,
+                "Day": dates.day,
+                "rr": 5.0,
+            }
+        )
+        station_a.loc[
+            (station_a["Year"] == 2019) & (station_a["Month"] == 1) & (station_a["Day"] == 15),
+            "rr",
+        ] = 10.0
+        df = pd.concat([station_a, station_b], ignore_index=True)
+
+        out = climatic_outliers(df, var_name="rr", station_id="A", units="mm")
+
+        self.assertEqual(out["station"].tolist(), ["A"])
+        self.assertEqual(out["Year"].tolist(), [2019])
+        self.assertEqual(out["Month"].tolist(), [1])
+        self.assertEqual(out["Day"].tolist(), [15])
+
+    def test_climatic_outliers_accepts_station_id_list_without_station_col(self):
+        dates = pd.date_range("2015-01-01", "2019-12-31", freq="D")
+        station_a = pd.DataFrame(
+            {
+                "station": "A",
+                "Year": dates.year,
+                "Month": dates.month,
+                "Day": dates.day,
+                "rr": 1.0,
+            }
+        )
+        station_b = pd.DataFrame(
+            {
+                "station": "B",
+                "Year": dates.year,
+                "Month": dates.month,
+                "Day": dates.day,
+                "rr": 5.0,
+            }
+        )
+        station_a.loc[
+            (station_a["Year"] == 2019) & (station_a["Month"] == 1) & (station_a["Day"] == 15),
+            "rr",
+        ] = 10.0
+        station_b.loc[
+            (station_b["Year"] == 2019) & (station_b["Month"] == 2) & (station_b["Day"] == 20),
+            "rr",
+        ] = 20.0
+        df = pd.concat([station_a, station_b], ignore_index=True)
+
+        out = climatic_outliers(df, var_name="rr", station_id=["A", "B"], units="mm")
+
+        self.assertEqual(sorted(out["station"].tolist()), ["A", "B"])
+        self.assertEqual(set(out["Month"]), {1, 2})
+
+
+class TestWmoGrossErrors(unittest.TestCase):
+    def test_check_units_converts_pressure_to_hpa(self):
+        values = pd.Series([101325.0, 760.0, 30.0])
+
+        converted_pa = check_units(values.iloc[[0]], "mslp", "Pa")
+        converted_mmhg = check_units(values.iloc[[1]], "mslp", "mmHg")
+        converted_in = check_units(values.iloc[[2]], "mslp", "in")
+
+        self.assertEqual(converted_pa.iloc[0], 1013.2)
+        self.assertEqual(converted_mmhg.iloc[0], 1013.2)
+        self.assertEqual(converted_in.iloc[0], 1015.9)
+
+    def test_wmo_gross_errors_ignores_invalid_months(self):
+        df = pd.DataFrame(
+            {
+                "Year": [2020],
+                "Month": [13],
+                "Day": [1],
+                "ta": [45.0],
+            }
+        )
+
+        out = wmo_gross_errors(df, "ta", lat=60)
+
+        self.assertTrue(out.empty)
+
+    def test_wmo_gross_errors_uses_numeric_station_ids_with_lat_df(self):
+        df = pd.DataFrame(
+            {
+                "station": [101, 101, 202, 202],
+                "Year": [2020, 2020, 2020, 2020],
+                "Month": [1, 7, 1, 7],
+                "Day": [1, 1, 1, 1],
+                "ta": [45.0, 45.0, 45.0, 45.0],
+            }
+        )
+        lat_df = pd.DataFrame(
+            {
+                "station_id": [101, 202],
+                "lat": [60.0, -60.0],
+            }
+        )
+
+        out = wmo_gross_errors(df, "ta", station_col="station", lat_df=lat_df)
+
+        self.assertEqual(sorted(out["station"].tolist()), [101, 101, 202, 202])
+        self.assertEqual(set(out["Test"]), {"wmo_gross_errors"})
+
+
+class TestWmoTimeConsistency(unittest.TestCase):
+    def test_wmo_time_consistency_flags_both_endpoints_for_pressure_jump(self):
+        df = pd.DataFrame(
+            {
+                "Year": [2020, 2020, 2020],
+                "Month": [1, 1, 1],
+                "Day": [1, 1, 1],
+                "Hour": [0, 1, 2],
+                "Minute": [0, 0, 0],
+                "p": [1000.0, 1004.1, 1005.0],
+            }
+        )
+
+        out = wmo_time_consistency(df, "p", units="hPa")
+
+        self.assertEqual(len(out), 2)
+        self.assertEqual(out["Hour"].tolist(), [0, 1])
+        self.assertEqual(set(out["Test"]), {"wmo_time_consistency"})
+
+    def test_wmo_time_consistency_uses_stepwise_temperature_tolerance(self):
+        df = pd.DataFrame(
+            {
+                "Year": [2020, 2020, 2020],
+                "Month": [1, 1, 1],
+                "Day": [1, 1, 1],
+                "Hour": [0, 2, 3],
+                "Minute": [0, 0, 0],
+                "ta": [10.0, 17.1, 18.0],
+            }
+        )
+
+        out = wmo_time_consistency(df, "ta", units="C")
+
+        self.assertEqual(len(out), 2)
+        self.assertEqual(out["Hour"].tolist(), [0, 2])
+
+    def test_wmo_time_consistency_ignores_changes_beyond_twelve_hours(self):
+        df = pd.DataFrame(
+            {
+                "Year": [2020, 2020],
+                "Month": [1, 1],
+                "Day": [1, 1],
+                "Hour": [0, 13],
+                "Minute": [0, 0],
+                "td": [5.0, 30.0],
+            }
+        )
+
+        out = wmo_time_consistency(df, "td", units="C")
+
+        self.assertTrue(out.empty)
 
 
 if __name__ == "__main__":
