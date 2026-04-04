@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Contrôle qualité | agrometflow</title>
+  <link rel="stylesheet" href="assets/course.css">
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">agrometflow · formation Cameroon</div>
+      <nav class="nav">
+        <a href="index.html">Accueil</a>
+        <a href="sources.html">Sources</a>
+        <a class="active" href="qualite.html">Contrôle qualité</a>
+        <a href="notebooks.html">Notebooks</a>
+      </nav>
+    </header>
+
+    <section class="panel">
+      <span class="eyebrow">Chaîne QC</span>
+      <h1>Présenter le contrôle qualité comme un processus, pas comme un bouton</h1>
+      <p class="lead">
+        Cette page transforme les slides QC en parcours pédagogique clair pour les apprenants: détecter, vérifier, corriger, relancer, puis documenter les flags.
+      </p>
+    </section>
+
+    <section class="panel">
+      <h2>Chaîne de contrôle recommandée</h2>
+      <div class="timeline">
+        <div class="timeline-step" data-step="1">
+          <h3>Formater les données</h3>
+          <p>Mettre les séries dans un format commun et exécuter les tests automatiques.</p>
+        </div>
+        <div class="timeline-step" data-step="2">
+          <h3>Vérifier les valeurs suspectes</h3>
+          <p>Retour à la source d’origine, au registre, ou au fichier brut pour distinguer erreur réelle et faux positif.</p>
+        </div>
+        <div class="timeline-step" data-step="3">
+          <h3>Corriger dans une copie de travail</h3>
+          <p>Ne jamais écraser silencieusement la donnée brute. La correction doit être traçable.</p>
+        </div>
+        <div class="timeline-step" data-step="4">
+          <h3>Relancer les tests</h3>
+          <p>Vérifier s’il reste des valeurs suspectes et ajuster les seuils si nécessaire.</p>
+        </div>
+        <div class="timeline-step" data-step="5">
+          <h3>Ajouter les flags</h3>
+          <p>Documenter les observations douteuses, même lorsqu’elles ne sont pas supprimées.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid-2">
+      <div class="panel">
+        <h2>Tests standards à montrer</h2>
+        <ul>
+          <li><strong>duplicate_dates</strong> / <strong>duplicate_times</strong>: détection des doublons temporels.</li>
+          <li><strong>daily_repetition</strong> / <strong>subdaily_repetition</strong>: détection des répétitions anormalement longues.</li>
+          <li><strong>daily_out_of_range</strong> / <strong>subdaily_out_of_range</strong>: dépassement de seuils physiques ou métier.</li>
+          <li><strong>wmo_gross_errors</strong>: bornes recommandées par l’OMM selon latitude et saison.</li>
+          <li><strong>climatic_outliers</strong>: valeurs rares mais pas nécessairement impossibles.</li>
+          <li><strong>temporal_coherence</strong>: sauts improbables entre jours consécutifs.</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h2>Messages pédagogiques</h2>
+        <div class="callout">
+          Un flag n’est pas une condamnation automatique de la donnée. C’est un signal de vérification.
+        </div>
+        <ul>
+          <li>Expliquer la différence entre impossibilité physique, rareté climatique et incohérence temporelle.</li>
+          <li>Faire commenter les faux positifs par les apprenants pour les entraîner au jugement métier.</li>
+          <li>Montrer que les seuils doivent être justifiés et éventuellement adaptés au contexte local.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Support pratique recommandé</h2>
+      <p>
+        Le notebook <a href="notebooks.html#nb-02">02 · Contrôle qualité journalier</a> a été préparé pour la formation.
+        Il fonctionne sur une petite série construite directement dans le notebook, ce qui évite tout téléchargement pendant la séance.
+      </p>
+      <div class="callout warning">
+        Pour les exercices, garde un exemple simple au départ. Si les apprenants découvrent à la fois Jupyter, Binder et la logique QC en même temps, la charge cognitive devient vite trop élevée.
+      </div>
+    </section>
+
+    <footer class="footer">
+      Page issue des sections “contrôle de qualité” et “tests standards” du support PowerPoint.
+    </footer>
+  </div>
+</body>
+</html>
