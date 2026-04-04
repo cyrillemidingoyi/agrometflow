@@ -1,0 +1,261 @@
+:root {
+  --bg: #f4f7f2;
+  --panel: rgba(255, 255, 255, 0.86);
+  --ink: #1b2a22;
+  --muted: #547164;
+  --line: #d6dfd9;
+  --primary: #0f766e;
+  --primary-2: #0a5a54;
+  --accent: #e7f6de;
+  --shadow: 0 15px 35px rgba(9, 25, 17, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", "Noto Sans", "Helvetica Neue", sans-serif;
+  background: linear-gradient(180deg, #f8fbf4 0%, #ecf3ed 100%);
+  color: var(--ink);
+  min-height: 100vh;
+}
+
+.container {
+  width: min(1160px, calc(100% - 2rem));
+  margin: 2rem auto 4rem;
+  position: relative;
+  z-index: 2;
+}
+
+.hero {
+  margin-bottom: 1.25rem;
+}
+
+.eyebrow {
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-size: 0.75rem;
+  margin: 0;
+}
+
+h1 {
+  margin: 0.2rem 0 0.2rem;
+  font-size: clamp(1.9rem, 4vw, 2.7rem);
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--muted);
+  max-width: 780px;
+}
+
+.nav-tabs {
+  margin-top: 0.8rem;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.tab {
+  text-decoration: none;
+  border: 1px solid #cddad4;
+  border-radius: 999px;
+  padding: 0.4rem 0.8rem;
+  color: #244a41;
+  background: #f2f8f4;
+  font-size: 0.9rem;
+}
+
+.tab.active {
+  background: linear-gradient(135deg, var(--primary), var(--primary-2));
+  color: #fff;
+  border-color: transparent;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  backdrop-filter: blur(6px);
+}
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.badge {
+  font-size: 0.8rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  background: var(--accent);
+  border: 1px solid #d3e7c8;
+}
+
+.upload-wrap {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.grid-2 {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.grid-3 {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.grid-4 {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.tests-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.4rem 0.8rem;
+  margin: 0.5rem 0 1rem;
+}
+
+.tests-group-label {
+  grid-column: 1 / -1;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  margin: 0.6rem 0 0.1rem;
+}
+
+.test-item {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.92rem;
+  color: #2d4f45;
+}
+
+label {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+input, select {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  padding: 0.6rem 0.65rem;
+  font-size: 0.95rem;
+  background: #fff;
+}
+
+.btn {
+  border: 0;
+  border-radius: 12px;
+  padding: 0.65rem 1rem;
+  cursor: pointer;
+  background: #dbe9e3;
+  color: #12322d;
+  font-weight: 600;
+}
+
+.btn.primary {
+  background: linear-gradient(135deg, var(--primary), var(--primary-2));
+  color: #fff;
+}
+
+.btn:hover {
+  filter: brightness(0.98);
+}
+
+.wmo-box {
+  margin: 0.8rem 0;
+  border: 1px dashed #bdd4ca;
+  border-radius: 12px;
+  padding: 0.65rem;
+  background: #f7fbfa;
+}
+
+.hint, .meta, .status {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.table-wrap {
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.86rem;
+}
+
+th, td {
+  border-bottom: 1px solid #edf1ee;
+  padding: 0.5rem;
+  text-align: left;
+  white-space: nowrap;
+}
+
+th {
+  background: #f6faf7;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.bg-orb {
+  position: fixed;
+  width: 420px;
+  height: 420px;
+  border-radius: 50%;
+  filter: blur(70px);
+  z-index: 1;
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.bg-orb-a {
+  background: #b8eac9;
+  top: -160px;
+  left: -120px;
+}
+
+.bg-orb-b {
+  background: #9ed8f8;
+  bottom: -180px;
+  right: -120px;
+}
+
+@media (max-width: 900px) {
+  .grid-2,
+  .grid-3,
+  .grid-4,
+  .tests-grid {
+    grid-template-columns: 1fr;
+  }
+}

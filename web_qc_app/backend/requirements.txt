@@ -1,0 +1,9 @@
+fastapi==0.116.1
+uvicorn[standard]==0.35.0
+python-multipart==0.0.20
+pandas>=2.2.0
+numpy>=1.26.0
+xarray>=2024.7.0
+netCDF4>=1.7.2
+openpyxl>=3.1.5
+h5netcdf>=1.4.1

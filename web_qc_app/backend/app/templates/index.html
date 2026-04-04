@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AgrometFlow QC Studio</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div class="bg-orb bg-orb-a"></div>
+  <div class="bg-orb bg-orb-b"></div>
+
+  <main class="container">
+    <header class="hero">
+      <p class="eyebrow">Climate Data Platform</p>
+      <h1>AgrometFlow QC Studio</h1>
+      <p class="subtitle">Upload, quality-control, fill missing values, and export CSV/Excel/NetCDF from one interface.</p>
+    </header>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>1) Upload Dataset</h2>
+        <span id="datasetBadge" class="badge">No dataset</span>
+      </div>
+      <div class="upload-wrap">
+        <input id="fileInput" type="file" accept=".csv,.txt,.xlsx,.xls,.nc,.nc4,.cdf" />
+        <button id="uploadBtn" class="btn primary">Upload</button>
+      </div>
+      <p class="hint">Supported: CSV, Excel, NetCDF (.nc, .nc4, .cdf)</p>
+    </section>
+
+    <section class="grid-2">
+      <div class="panel">
+        <h2>2) Fill Missing Values</h2>
+        <div class="field">
+          <label>Columns (comma-separated)</label>
+          <input id="fillCols" type="text" placeholder="Tx, Tn, rr" />
+        </div>
+        <div class="field">
+          <label>Method</label>
+          <select id="fillMethod">
+            <option value="linear">linear</option>
+            <option value="ffill">ffill</option>
+            <option value="bfill">bfill</option>
+            <option value="mean">mean</option>
+            <option value="median">median</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Group by (optional)</label>
+          <input id="fillGroup" type="text" placeholder="station" />
+        </div>
+        <button id="fillBtn" class="btn">Apply Fill</button>
+      </div>
+
+      <div class="panel">
+        <h2>3) Export</h2>
+        <div class="field">
+          <label>Format</label>
+          <select id="exportFormat">
+            <option value="csv">csv</option>
+            <option value="xlsx">xlsx</option>
+            <option value="netcdf">netcdf</option>
+          </select>
+        </div>
+        <button id="exportBtn" class="btn">Download Export</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>4) Run QC</h2>
+      <div class="grid-3">
+        <div class="field">
+          <label>Frequency</label>
+          <select id="frequency">
+            <option value="daily">daily</option>
+            <option value="subdaily">subdaily</option>
+            <option value="auto">auto</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Station Column</label>
+          <input id="stationCol" type="text" value="station" />
+        </div>
+        <div class="field">
+          <label>Variables (comma-separated)</label>
+          <input id="variables" type="text" placeholder="Tx,Tn,rr" />
+        </div>
+      </div>
+
+      <details class="wmo-box">
+        <summary>Enable WMO Gross Errors (optional)</summary>
+        <div class="grid-4">
+          <div class="field">
+            <label><input id="wmoEnabled" type="checkbox" /> Enable</label>
+          </div>
+          <div class="field">
+            <label>Input Column</label>
+            <input id="wmoInput" type="text" placeholder="Tn" />
+          </div>
+          <div class="field">
+            <label>WMO Code</label>
+            <select id="wmoCode">
+              <option value="ta">ta</option>
+              <option value="td">td</option>
+              <option value="mslp">mslp</option>
+              <option value="p">p</option>
+              <option value="w">w</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Latitude Column (optional)</label>
+            <input id="wmoLatCol" type="text" placeholder="lat" />
+          </div>
+        </div>
+      </details>
+
+      <button id="runQcBtn" class="btn primary">Run QC</button>
+    </section>
+
+    <section class="panel">
+      <h2>Data Preview</h2>
+      <div id="previewMeta" class="meta"></div>
+      <div class="table-wrap">
+        <table id="previewTable"></table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>QC Results</h2>
+      <div id="qcSummary" class="meta"></div>
+      <div class="table-wrap">
+        <table id="qcTable"></table>
+      </div>
+    </section>
+
+    <p id="status" class="status">Ready.</p>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

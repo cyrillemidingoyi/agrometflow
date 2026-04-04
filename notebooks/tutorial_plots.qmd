@@ -1,0 +1,407 @@
+---
+title: "Tutorial for the quality control of climate data with agrometflow"
+author: "agrometflow"
+date: today
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    toc-location: left
+    theme: cosmo
+    code-fold: false
+    code-tools: true
+    number-sections: true
+    self-contained: true
+    highlight-style: github
+    fig-width: 10
+    fig-height: 5
+execute:
+  kernel: python3
+  warning: false
+jupyter: agrometflow
+---
+
+## Introduction
+
+This page illustrates how to use the **agrometflow** plotting functions for visual
+quality control of climate data. These functions are inspired by the R package
+[dataresqc](https://github.com/c3s-data-rescue-service/dataresqc) by Yuri Brugnara & Stefan Hunziker.
+
+The functions covered here are:
+
+| Function | Description |
+|---|---|
+| `plot_daily` | Daily time series with missing-data indicators |
+| `plot_decimals` | Distribution of decimal digits (reporting resolution) |
+| `plot_weekly_cycle` | Wet-day fraction by day of week (data-rescue bias test) |
+| `plot_subdaily` | Sub-daily data organized by month |
+
+All functions display inline in Jupyter/Quarto by default (`show=True`) and
+can optionally save to PDF (`outfile=` or `outpath=`).
+
+---
+
+## Setup
+
+```{python}
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from pathlib import Path
+from agrometflow.dataquality.plots import (
+    plot_decimals,
+    plot_daily,
+    plot_subdaily,
+    plot_weekly_cycle
+)
+```
+
+---
+
+## Load sample data
+
+We use a daily climate series downloaded from [NASA POWER](https://power.larc.nasa.gov/)
+for a location in West Africa (lat 12.5°N, lon -1.2°E), covering 1981–2020.
+
+```{python}
+csv_path = Path("data/climate/power/power_19810101_20201231.csv")
+
+clim_df = pd.read_csv(csv_path)
+clim_df["Date"] = pd.to_datetime(clim_df["Date"], format="%Y%m%d", errors="coerce")
+
+print(f"Records : {len(clim_df)}")
+print(f"Period  : {clim_df['Date'].min().date()} → {clim_df['Date'].max().date()}")
+print(f"Columns : {list(clim_df.columns)}")
+clim_df.head()
+```
+
+---
+
+## Daily time series {#sec-daily}
+
+The function `plot_daily` plots a daily time series with one panel per year
+(or group of years). Missing dates are marked with red crosses at the bottom
+of each panel.
+
+### One year per panel
+
+```{python}
+plot_daily(
+    data=clim_df[["Date", "TMAX"]].rename(columns={"TMAX": "value"}),
+    date_col="Date",
+    value_col="value",
+    var_name="Tmax",
+    units="°C",
+    startyear=2010,
+    endyear=2012,
+    years_per_panel=1,
+    show_missing=True,
+    show=True,
+    color="steelblue",
+    linewidth=0.8
+)
+```
+
+### Multiple years per panel
+
+You can group several years in a single panel using `years_per_panel`:
+
+```{python}
+plot_daily(
+    data=clim_df[["Date", "TMAX"]].rename(columns={"TMAX": "value"}),
+    date_col="Date",
+    value_col="value",
+    var_name="Tmax",
+    units="°C",
+    startyear=1981,
+    endyear=2020,
+    years_per_panel=5,
+    show_missing=False,
+    show=True,
+    color="darkorange",
+    linewidth=0.6,
+    alpha=0.8
+)
+```
+
+---
+
+## Distribution of decimals {#sec-decimals}
+
+The function `plot_decimals` examines the **reporting resolution** of a series
+by counting how often each decimal digit (0–9) appears in the data.
+
+A uniform distribution across all decimals indicates 0.1-unit precision.
+Systematic over- or under-representation of certain decimals is a sign of
+rounding, conversion artefacts, or digitization biases.
+
+```{python}
+plot_decimals(
+    data=clim_df[["Date", "TMAX"]].rename(columns={"TMAX": "value"}),
+    date_col="Date",
+    value_col="value",
+    startyear=1981,
+    endyear=2020,
+    show=True
+)
+```
+
+::: {.callout-note}
+In this NASA POWER example, the decimals are distributed fairly uniformly —
+expected for a gridded reanalysis product. For digitized station data, you
+would typically see spikes at `.0` or `.5` (0.5°C or 1°C resolution).
+:::
+
+---
+
+## Weekly cycle in precipitation {#sec-weekly}
+
+The function `plot_weekly_cycle` tests whether wet-day frequency varies
+systematically by day of week using a **binomial test** (Hunziker et al., 2017).
+
+This is useful for detecting data-rescue biases: if a human observer tended
+to skip or accumulate observations on certain days of the week, a systematic
+pattern would appear.
+
+Bars shown in **red** indicate a statistically significant deviation from the
+overall wet-day probability (dashed line).
+
+```{python}
+results = plot_weekly_cycle(
+    data=clim_df[["Date", "PR"]].rename(columns={"PR": "rr"}),
+    date_col="Date",
+    precip_col="rr",
+    station_id="POWER_station",
+    threshold=1.0,
+    confidence_level=0.95,
+    show=True
+)
+
+print(f"\nOverall wet-day probability φ = {results['phi']:.3f}")
+print("\nSignificant deviations by day of week:")
+found = False
+for wd, sig, frac in zip(results["weekdays"], results["significant"], results["fractions"]):
+    if sig:
+        direction = "↑" if frac > results["phi"] else "↓"
+        print(f"  {wd}: {frac:.3f} {direction}")
+        found = True
+if not found:
+    print("  None — no significant weekly cycle detected.")
+```
+
+---
+
+## Sub-daily data {#sec-subdaily}
+
+The function `plot_subdaily` plots sub-daily observations organized by month,
+with one panel per month (4 × 3 grid). This is useful for inspecting
+digitized historical sub-daily data for transcription errors, time-of-day
+biases, or systematic shifts.
+
+Here we illustrate with synthetic hourly temperature data following a realistic
+annual + diurnal cycle:
+
+```{python}
+dates = pd.date_range("2020-01-01", "2020-12-31 23:00", freq="h")
+np.random.seed(42)
+synthetic_temp = (
+    20
+    + 10 * np.sin(2 * np.pi * np.arange(len(dates)) / (24 * 365) - np.pi / 2)
+    +  6 * np.sin(2 * np.pi * np.arange(len(dates)) / 24 - np.pi / 2)
+    +  np.random.randn(len(dates)) * 1.5
+)
+
+subdaily_df = pd.DataFrame({"datetime": dates, "value": synthetic_temp})
+
+plot_subdaily(
+    data=subdaily_df,
+    datetime_col="datetime",
+    value_col="value",
+    var_name="Temperature (synthetic)",
+    units="°C",
+    year=2020,
+    fixed_ylim=True,
+    show=True,
+    marker=".",
+    markersize=1,
+    linestyle="",
+    alpha=0.5,
+    color="royalblue"
+)
+```
+
+---
+
+## Save plots to PDF
+
+All functions accept an optional `outfile` (or `outpath` for `plot_weekly_cycle`)
+parameter to save the plot to a PDF in addition to displaying it.
+
+```{python}
+# Example: save decimals plot to PDF and display inline
+out_dir = Path("data/qc")
+out_dir.mkdir(parents=True, exist_ok=True)
+
+plot_decimals(
+    data=clim_df[["Date", "TMAX"]].rename(columns={"TMAX": "value"}),
+    date_col="Date",
+    value_col="value",
+    startyear=2000,
+    endyear=2020,
+    outfile=out_dir / "decimals_TMAX.pdf",
+    show=True
+)
+```
+
+---
+
+## GHCN-Daily station data {#sec-ghcnd}
+
+The `GHCNDDownloader` fetches station observations from the
+[NOAA GHCN-Daily](https://www.ncei.noaa.gov/products/land-based-station/global-historical-climatology-network-daily)
+database — the largest archive of daily climate records (~120 000 stations worldwide).
+
+### Search available stations
+
+```{python}
+from agrometflow.climate.ghcnd import GHCNDDownloader
+
+dl = GHCNDDownloader(verbose=True)
+
+# Search stations inside a bounding box (West Africa example)
+bbox = (-5.0, 10.0, 5.0, 16.0)   # (min_lon, min_lat, max_lon, max_lat)
+stations = dl.search_stations(bbox=bbox)
+print(f"Stations found: {len(stations)}")
+stations.head(10)
+```
+
+### Check variable inventory
+
+Before downloading, inspect which variables and years are available:
+
+```{python}
+inventory = dl.get_inventory()
+
+# Filter to our bounding box stations and core temperature variables
+sids = stations["station_id"].tolist()
+inv_sub = inventory[
+    inventory["station_id"].isin(sids)
+    & inventory["variable"].isin(["TMAX", "TMIN", "PRCP"])
+].sort_values(["station_id", "variable"])
+
+print(f"Inventory rows: {len(inv_sub)}")
+inv_sub.head(15)
+```
+
+### Download by station ID
+
+```{python}
+#| eval: false
+# Pick one station as an example
+station_id = stations.iloc[0]["station_id"]
+print(f"Downloading station: {station_id}")
+
+dl.download(
+    station_ids=[station_id],
+    start_date="2000-01-01",
+    end_date="2020-12-31",
+    variables=["TMAX", "TMIN", "PRCP"],
+    output_dir="data/ghcnd",
+)
+
+df_station = dl.extract(variables=["TMAX", "TMIN", "PRCP"])
+print(f"Records: {len(df_station)}")
+df_station.head()
+```
+
+### Download all stations in a bounding box
+
+```{python}
+#| eval: false
+dl_bbox = GHCNDDownloader()
+
+dl_bbox.download(
+    bbox=bbox,
+    start_date="2010-01-01",
+    end_date="2020-12-31",
+    variables=["TMAX", "TMIN", "PRCP"],
+    output_dir="data/ghcnd",
+    min_years=5,          # skip stations with < 5 years of overlap
+    max_workers=8,
+)
+
+df_bbox = dl_bbox.extract(variables=["TMAX", "TMIN", "PRCP"])
+print(f"Stations: {df_bbox['station'].nunique()}")
+print(f"Records : {len(df_bbox)}")
+df_bbox.head()
+```
+
+### Plot downloaded GHCN-Daily data
+
+Once downloaded, the output CSV can be read back and plotted with the same
+functions as POWER data:
+
+```{python}
+#| eval: false
+from pathlib import Path
+from agrometflow.climate.ghcnd import GHCNDDownloader
+from agrometflow.dataquality.plots import plot_daily, plot_decimals
+
+dl = GHCNDDownloader()
+df = dl.extract(source="data/ghcnd/ghcnd_20100101_20201231.csv",
+                variables=["TMAX", "TMIN", "PRCP"])
+
+# Plot daily TMAX for first station
+sid = df["station"].iloc[0]
+df_s = df[df["station"] == sid][["date", "TMAX"]].rename(columns={"TMAX": "value"})
+
+plot_daily(
+    data=df_s,
+    date_col="date",
+    value_col="value",
+    var_name=f"Tmax — {sid}",
+    units="°C",
+    show=True,
+    color="tomato",
+    linewidth=0.8,
+)
+
+plot_decimals(
+    data=df_s,
+    date_col="date",
+    value_col="value",
+    show=True,
+)
+```
+
+### Variable reference
+
+| Code | Description | Unit (after conversion) |
+|------|-------------|------------------------|
+| `TMAX` | Maximum temperature | °C |
+| `TMIN` | Minimum temperature | °C |
+| `TAVG` | Average temperature | °C |
+| `PRCP` | Precipitation | mm |
+| `SNOW` | Snowfall | mm |
+| `SNWD` | Snow depth | mm |
+| `AWND` | Average wind speed | m/s |
+
+::: {.callout-tip}
+Raw GHCN-Daily values for temperature and precipitation are stored in tenths
+of the unit. `GHCNDDownloader` divides them by 10 automatically when
+`convert_units=True` (the default).
+:::
+
+---
+
+## References
+
+- Hunziker, S., et al. (2017). Errors in climate data with emphasis on the
+  European region. *Int. J. Climatol.*, 37, 4131–4145.
+  <https://doi.org/10.1002/joc.5001>
+
+- Hunziker, S., et al. (2018). Identifying, attributing, and overcoming
+  common data quality issues. *Clim. Past*, 14, 1–20.
+  <https://doi.org/10.5194/cp-14-1-2018>
+
+- dataresqc R package: <https://github.com/c3s-data-rescue-service/dataresqc>

@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QC Studio - Data</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <main class="container">
+    <header class="hero">
+      <p class="eyebrow">AgrometFlow QC Studio</p>
+      <h1>Data Workspace</h1>
+      <p class="subtitle">Upload datasets, preview, fill missing values, and create export outputs.</p>
+      <nav class="nav-tabs">
+        <a class="tab active" href="/data">Data</a>
+        <a class="tab" href="/qc">Quality Control</a>
+        <a class="tab" href="/outputs">Outputs</a>
+      </nav>
+    </header>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Upload</h2>
+        <span id="datasetBadge" class="badge">No dataset</span>
+      </div>
+      <div class="upload-wrap">
+        <input id="fileInput" type="file" accept=".csv,.txt,.xlsx,.xls,.nc,.nc4,.cdf" />
+        <button id="uploadBtn" class="btn primary">Upload dataset</button>
+      </div>
+      <p class="hint">Formats: CSV, Excel, NetCDF.</p>
+    </section>
+
+    <section class="grid-2">
+      <div class="panel">
+        <h2>Fill Missing Values</h2>
+        <div class="field">
+          <label>Columns (comma-separated)</label>
+          <input id="fillCols" type="text" placeholder="Tx, Tn, rr" />
+        </div>
+        <div class="field">
+          <label>Method</label>
+          <select id="fillMethod">
+            <option value="linear">linear</option>
+            <option value="ffill">ffill</option>
+            <option value="bfill">bfill</option>
+            <option value="mean">mean</option>
+            <option value="median">median</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Group by (optional)</label>
+          <input id="fillGroup" type="text" placeholder="station" />
+        </div>
+        <button id="fillBtn" class="btn">Apply fill</button>
+      </div>
+
+      <div class="panel">
+        <h2>Export Current Dataset</h2>
+        <div class="field">
+          <label>Format</label>
+          <select id="exportFormat">
+            <option value="csv">csv</option>
+            <option value="xlsx">xlsx</option>
+            <option value="netcdf">netcdf</option>
+          </select>
+        </div>
+        <button id="exportBtn" class="btn">Create export output</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Preview</h2>
+      <div id="previewMeta" class="meta"></div>
+      <div class="table-wrap">
+        <table id="previewTable"></table>
+      </div>
+    </section>
+
+    <p id="status" class="status">Ready.</p>
+  </main>
+
+  <script src="/static/common.js"></script>
+  <script src="/static/data.js"></script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QC Studio - Outputs</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <main class="container">
+    <header class="hero">
+      <p class="eyebrow">AgrometFlow QC Studio</p>
+      <h1>Outputs Manager</h1>
+      <p class="subtitle">Download or delete generated outputs (QC flags, filled data, exports).</p>
+      <nav class="nav-tabs">
+        <a class="tab" href="/data">Data</a>
+        <a class="tab" href="/qc">Quality Control</a>
+        <a class="tab active" href="/outputs">Outputs</a>
+      </nav>
+    </header>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Generated outputs</h2>
+        <button id="refreshBtn" class="btn">Refresh</button>
+      </div>
+      <div class="table-wrap">
+        <table id="outputsTable"></table>
+      </div>
+    </section>
+
+    <p id="status" class="status">Ready.</p>
+  </main>
+
+  <script src="/static/common.js"></script>
+  <script src="/static/outputs.js"></script>
+</body>
+</html>

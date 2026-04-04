@@ -1,0 +1,10 @@
+version: "3.3"
+
+services:
+  qc-studio:
+    build:
+      context: ..
+      dockerfile: web_qc_app/backend/Dockerfile
+    ports:
+      - "8080:8080"
+    restart: unless-stopped

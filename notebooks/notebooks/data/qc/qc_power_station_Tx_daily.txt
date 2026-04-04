@@ -1,4 +1,0 @@
-Var	Year	Month	Day	Value	Test
-Tx	2020	1	7	31.58	temporal_coherence
-Tx	2020	1	8	133.34	daily_out_of_range;temporal_coherence
-Tx	2020	1	9	31.94	temporal_coherence
