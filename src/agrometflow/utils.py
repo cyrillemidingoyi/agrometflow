@@ -1,8 +1,5 @@
 import logging
 from pathlib import Path
-import xarray as xr
-import pandas as pd
-from agrometflow.metadata import metadata
 import re
 
 
@@ -40,12 +37,14 @@ def guess_variable_type(variable):
     """
     Devine le type (climate, soil...) auquel appartient une variable.
     """
+    from agrometflow.metadata import metadata
     for var_type in metadata.keys():
         if variable in metadata[var_type]:
             return var_type
     return None
 
 def resolve_variables(source, product, variables, logger=None):
+    from agrometflow.metadata import metadata
     resolved = []
     var_type = guess_variable_type(variables[0])
     print(f"var_type: {var_type}", flush=True)
@@ -66,7 +65,8 @@ def resolve_variables(source, product, variables, logger=None):
     return resolved
 
 def split_yearly(ncfile, output_dir=None):
-
+    import xarray as xr
+    import pandas as pd
 
     # Load your full dataset
     ds = xr.open_dataset(ncfile)
@@ -83,8 +83,6 @@ def split_yearly(ncfile, output_dir=None):
         ds_year.to_netcdf(out_file)
         print(f"✅ Saved {out_file}")
 
-
-from pathlib import Path
 
 def write_cdsapirc_from_config(cdsapi_config, logger=None):
     """
@@ -114,12 +112,10 @@ verify: {cdsapi_config.get('verify', 1)}
     return path
 
 
-import xarray as xr
-import geopandas as gpd
-import rioxarray
-from pathlib import Path
-
 def clip_with_shapefile(nc_path, shp_path, ds=None, output_path=None):
+    import xarray as xr
+    import geopandas as gpd
+    import rioxarray  # noqa: F401 — needed for .rio accessor
     # Charger NetCDF (il faut que lon/lat soient des coords)
     if ds is None: ds = xr.open_dataset(nc_path)
     # Charger shapefile
@@ -138,6 +134,7 @@ def clip_with_shapefile(nc_path, shp_path, ds=None, output_path=None):
         return ds_clipped
 
 def clipwithbbox(nc_path, lat_min, lat_max, lon_min, lon_max, ds=None, output_path=None):
+    import xarray as xr
     if ds is None: ds = xr.open_dataset(nc_path)
     ds_clipped = ds.sel(
         lat=slice(lat_min, lat_max),
@@ -150,13 +147,13 @@ def clipwithbbox(nc_path, lat_min, lat_max, lon_min, lon_max, ds=None, output_pa
         return ds_clipped  
     
 
-import xarray as xr
-import numpy as np
-def extract_points_from_tuples(ds: xr.Dataset, points):
+def extract_points_from_tuples(ds, points):
     """
     points: list[(lon, lat)]
     Output: Dataset dims ('time', 'point'), avec coords req_lon/req_lat
     """
+    import xarray as xr
+    import numpy as np
     lons = np.array([p[0] for p in points], dtype=float)
     lats = np.array([p[1] for p in points], dtype=float)
 
@@ -170,7 +167,7 @@ def extract_points_from_tuples(ds: xr.Dataset, points):
     return out
 
 
-def dataset_points_to_dataframe(ds_pts: xr.Dataset):
+def dataset_points_to_dataframe(ds_pts):
     """
     Retourne un DF avec colonnes: time, point, lon, lat, + variables (en colonnes)
     """

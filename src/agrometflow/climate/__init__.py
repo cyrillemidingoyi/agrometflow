@@ -1,12 +1,23 @@
-from agrometflow.climate.power import PowerDownloader
-from agrometflow.climate.ghcnd import GHCNDDownloader
-from agrometflow.climate.cds import CDSDownloader
-from agrometflow.climate.chirps import ChirpsDownloader  # si besoin
-from agrometflow.climate.tamsat import TamsatDownloader
-from agrometflow.climate.arc2 import Arc2Downloader
-from agrometflow.climate.persiann import PersiannDownloader
-from agrometflow.climate.cmorphv1 import Cmorphv1Downloader
-from agrometflow.climate.rfe2 import Rfe2Downloader
+def __getattr__(name):
+    """Lazy-import downloaders so heavy deps (xarray, rioxarray…) are only
+    loaded when actually accessed."""
+    _map = {
+        "PowerDownloader": "agrometflow.climate.power",
+        "GHCNDDownloader": "agrometflow.climate.ghcnd",
+        "CDSDownloader": "agrometflow.climate.cds",
+        "ChirpsDownloader": "agrometflow.climate.chirps",
+        "TamsatDownloader": "agrometflow.climate.tamsat",
+        "Arc2Downloader": "agrometflow.climate.arc2",
+        "PersiannDownloader": "agrometflow.climate.persiann",
+        "Cmorphv1Downloader": "agrometflow.climate.cmorphv1",
+        "Rfe2Downloader": "agrometflow.climate.rfe2",
+    }
+    if name in _map:
+        import importlib
+        mod = importlib.import_module(_map[name])
+        return getattr(mod, name)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
 
 def get_climate_source(source_name, **kwargs):
     """
@@ -26,23 +37,22 @@ def get_climate_source(source_name, **kwargs):
     """
     source_name = source_name.lower()
 
-    if source_name == "power":
-        return PowerDownloader(**kwargs)
-    elif source_name == "cds":
-        return CDSDownloader(**kwargs)
-    elif source_name == "chirps":
-        return ChirpsDownloader(**kwargs)
-    elif source_name == "tamsat":
-        return TamsatDownloader(**kwargs)
-    elif source_name == "arc2":
-        return Arc2Downloader(**kwargs)
-    elif source_name == "persiann":
-        return PersiannDownloader(**kwargs)
-    elif source_name == "cmorphv1":
-        return Cmorphv1Downloader(**kwargs)
-    elif source_name == "rfe2":
-        return Rfe2Downloader(**kwargs)
-    elif source_name == "ghcnd":
-        return GHCNDDownloader(**kwargs)
-    else:
+    _factories = {
+        "power": ("agrometflow.climate.power", "PowerDownloader"),
+        "cds": ("agrometflow.climate.cds", "CDSDownloader"),
+        "chirps": ("agrometflow.climate.chirps", "ChirpsDownloader"),
+        "tamsat": ("agrometflow.climate.tamsat", "TamsatDownloader"),
+        "arc2": ("agrometflow.climate.arc2", "Arc2Downloader"),
+        "persiann": ("agrometflow.climate.persiann", "PersiannDownloader"),
+        "cmorphv1": ("agrometflow.climate.cmorphv1", "Cmorphv1Downloader"),
+        "rfe2": ("agrometflow.climate.rfe2", "Rfe2Downloader"),
+        "ghcnd": ("agrometflow.climate.ghcnd", "GHCNDDownloader"),
+    }
+
+    if source_name not in _factories:
         raise ValueError(f"Unknown climate source: '{source_name}'")
+
+    import importlib
+    mod_path, cls_name = _factories[source_name]
+    mod = importlib.import_module(mod_path)
+    return getattr(mod, cls_name)(**kwargs)
