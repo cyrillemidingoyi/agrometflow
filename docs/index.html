@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Formation Cameroon | agrometflow</title>
+  <meta name="description" content="Support de formation sur les sources de données climatiques et le contrôle qualité avec agrometflow.">
+  <link rel="stylesheet" href="assets/course.css">
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">agrometflow · formation Cameroon</div>
+      <nav class="nav">
+        <a class="active" href="index.html">Accueil</a>
+        <a href="sources.html">Sources</a>
+        <a href="qualite.html">Contrôle qualité</a>
+        <a href="notebooks.html">Notebooks</a>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <div class="hero-card">
+        <span class="eyebrow">Support de formation</span>
+        <h1>Sources de données climatiques et contrôle qualité avec agrometflow</h1>
+        <p class="lead">
+          Ce site reprend les axes de ton PowerPoint et les réorganise pour un usage en formation:
+          lecture rapide dans le navigateur, démonstrations exécutables via Binder, et exercices guidés
+          sans installation lourde sur les machines des apprenants.
+        </p>
+        <div class="actions">
+          <a class="button primary" href="notebooks.html">Ouvrir le parcours pratique</a>
+          <a class="button secondary" href="https://mybinder.org/v2/gh/cyrillemidingoyi/agrometflow/HEAD?urlpath=lab/tree/notebooks/formation_cameroon" target="_blank" rel="noreferrer">Lancer Binder</a>
+          <a class="button" href="https://github.com/cyrillemidingoyi/agrometflow" target="_blank" rel="noreferrer">Voir le dépôt</a>
+        </div>
+      </div>
+      <div class="hero-side">
+        <div class="metric">
+          <strong>0</strong>
+          <p>installation lourde recommandée pendant la formation. Le scénario nominal est: navigateur web + Binder.</p>
+        </div>
+        <div class="note">
+          <h3>Architecture recommandée</h3>
+          <p>
+            <strong>GitHub Pages</strong> pour le support du cours,
+            <strong>Binder</strong> pour l’exécution des notebooks,
+            et un <strong>jeu d’exercices local léger</strong> comme plan B si la connexion devient instable.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Ce que couvre la formation</h2>
+      <div class="grid-3">
+        <div class="card">
+          <h3>1. Typologies de données</h3>
+          <p>Observations in situ, télédétection, réanalyses et projections climatiques.</p>
+          <p>Le fil directeur reste celui du cours: comprendre ce que chaque famille apporte, et où sont ses limites.</p>
+        </div>
+        <div class="card">
+          <h3>2. Infrastructures d’accès</h3>
+          <p>GHCN-D, NASA POWER, ERA5, CHIRPS, ARC2, IMERG et autres produits déjà présents dans l’écosystème agrometflow.</p>
+        </div>
+        <div class="card">
+          <h3>3. Contrôle qualité</h3>
+          <p>Chaîne QC, faux positifs, vérification à la source, corrections, réexécution et ajout des flags.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Parcours pédagogique proposé</h2>
+      <div class="timeline">
+        <div class="timeline-step" data-step="1">
+          <h3>Cadre conceptuel</h3>
+          <p>Présenter les typologies de sources et les compromis: couverture, résolution, biais, métadonnées, disponibilité opérationnelle.</p>
+        </div>
+        <div class="timeline-step" data-step="2">
+          <h3>Lecture des catalogues</h3>
+          <p>Montrer comment agrometflow référence déjà plusieurs produits utiles pour la pluviométrie, la température et l’analyse agroclimatique.</p>
+        </div>
+        <div class="timeline-step" data-step="3">
+          <h3>Étude pratique</h3>
+          <p>Faire manipuler des notebooks courts: exploration des sources, téléchargement léger NASA POWER, contrôle qualité journalier.</p>
+        </div>
+        <div class="timeline-step" data-step="4">
+          <h3>Discussion métier</h3>
+          <p>Comparer ce qui est acceptable pour le suivi saisonnier, le conseil agricole, la recherche, et la calibration de modèles.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid-2">
+      <div class="panel">
+        <h2>Messages clés du support</h2>
+        <div class="callout">
+          Les données satellitaires sont indispensables pour la couverture globale, mais elles ne remplacent pas les stations. La bonne pratique reste l’approche hybride: stations + satellite + réanalyse + correction locale.
+        </div>
+        <ul>
+          <li>Les observations in situ restent la référence, mais souffrent souvent de faible densité et de problèmes de métadonnées.</li>
+          <li>Les produits satellitaires améliorent la couverture spatiale, mais gardent des biais régionaux, saisonniers et liés au type de pluie.</li>
+          <li>Les réanalyses offrent une série cohérente et complète, mais leur résolution et leurs biais doivent être explicitement discutés.</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h2>Format de séance conseillé</h2>
+        <ul>
+          <li><strong>30 min</strong> de cadrage sur les familles de données climatiques.</li>
+          <li><strong>30 min</strong> sur les portails et les produits utiles en Afrique centrale et de l’Ouest.</li>
+          <li><strong>45 min</strong> de démonstration agrometflow avec Binder.</li>
+          <li><strong>45 min</strong> d’exercices en petits groupes et restitution.</li>
+        </ul>
+        <div class="callout warning">
+          Si tu anticipes une connexion fragile, fais exécuter seulement le notebook QC local en séance et garde le notebook NASA POWER pour la démonstration magistrale.
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Raccourcis vers les notebooks</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Notebook</th>
+              <th>Objectif</th>
+              <th>Niveau</th>
+              <th>Mode</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><a href="notebooks.html#nb-00">00 · Parcours sources climatiques</a></td>
+              <td>Faire le lien entre le cours et les catalogues internes d’agrometflow.</td>
+              <td><span class="badge">débutant</span></td>
+              <td>hors ligne</td>
+            </tr>
+            <tr>
+              <td><a href="notebooks.html#nb-01">01 · Explorer les sources agrometflow</a></td>
+              <td>Comparer produits, variables et liens utiles.</td>
+              <td><span class="badge">débutant</span></td>
+              <td>hors ligne</td>
+            </tr>
+            <tr>
+              <td><a href="notebooks.html#nb-02">02 · Contrôle qualité journalier</a></td>
+              <td>Comprendre les flags à partir d’une série simple et pédagogique.</td>
+              <td><span class="badge">intermédiaire</span></td>
+              <td>hors ligne</td>
+            </tr>
+            <tr>
+              <td><a href="notebooks.html#nb-03">03 · Démarrage NASA POWER</a></td>
+              <td>Faire un premier téléchargement réel sur un point au Cameroun.</td>
+              <td><span class="badge">intermédiaire</span></td>
+              <td>internet requis</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer class="footer">
+      Support structuré à partir du PowerPoint fourni et des capacités déjà présentes dans le dépôt agrometflow.
+    </footer>
+  </div>
+</body>
+</html>

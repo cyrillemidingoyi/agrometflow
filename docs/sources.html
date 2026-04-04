@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sources climatiques | agrometflow</title>
+  <link rel="stylesheet" href="assets/course.css">
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">agrometflow · formation Cameroon</div>
+      <nav class="nav">
+        <a href="index.html">Accueil</a>
+        <a class="active" href="sources.html">Sources</a>
+        <a href="qualite.html">Contrôle qualité</a>
+        <a href="notebooks.html">Notebooks</a>
+      </nav>
+    </header>
+
+    <section class="panel">
+      <span class="eyebrow">Typologies</span>
+      <h1>Comparer les familles de données climatiques</h1>
+      <p class="lead">
+        Cette page condense les sections centrales du support de cours: observations in situ, télédétection, réanalyses et produits complémentaires disponibles via agrometflow.
+      </p>
+    </section>
+
+    <section class="grid-3">
+      <div class="card">
+        <h2>Observations in situ</h2>
+        <p>Référence pour la mesure directe. Essentielles pour la validation, l’homogénéisation et les corrections locales.</p>
+        <ul>
+          <li>Forces: mesure de référence, historique stationnel, usage opérationnel.</li>
+          <li>Faiblesses: réseaux peu denses, ruptures de série, changements d’instruments, métadonnées parfois incomplètes.</li>
+          <li>Portails du cours: GHCN-D, GSOD, portails des services météorologiques nationaux.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h2>Télédétection</h2>
+        <p>Complète la couverture spatiale là où le réseau est insuffisant, surtout pour la pluie.</p>
+        <ul>
+          <li>Produits évoqués dans le cours: CHIRPS, IMERG, ARC2, RFE2, TAMSAT.</li>
+          <li>Forces: couverture régionale ou globale, disponibilité rapide, suivi spatial cohérent.</li>
+          <li>Faiblesses: sous-estimation de certaines pluies convectives, biais régionaux persistants, dépendance partielle à l’information stationnelle.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h2>Réanalyses et modèles</h2>
+        <p>Très utiles pour obtenir des séries complètes, multi-variables et spatialement continues.</p>
+        <ul>
+          <li>Produits du cours: ERA5, ERA5-Land, MERRA-2.</li>
+          <li>Forces: cohérence spatio-temporelle, richesse des variables, couverture historique.</li>
+          <li>Faiblesses: résolution parfois trop grossière pour le local, biais dépendants des variables et des régions.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Produits à citer pendant la formation</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Produit</th>
+              <th>Type</th>
+              <th>Usage pédagogique</th>
+              <th>Lien</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>GHCN-Daily</td>
+              <td>stations</td>
+              <td>contrôle qualité, comparaison avec produits grilles</td>
+              <td><a href="https://www.ncei.noaa.gov/access/search/dataset-search" target="_blank" rel="noreferrer">NCEI NOAA</a></td>
+            </tr>
+            <tr>
+              <td>NASA POWER</td>
+              <td>agroclimatique dérivé</td>
+              <td>démonstration simple point par point</td>
+              <td><a href="https://power.larc.nasa.gov/" target="_blank" rel="noreferrer">NASA POWER</a></td>
+            </tr>
+            <tr>
+              <td>CHIRPS</td>
+              <td>satellite + stations</td>
+              <td>pluviométrie historique et suivi régional</td>
+              <td><a href="https://www.chc.ucsb.edu/data/chirps" target="_blank" rel="noreferrer">UCSB CHC</a></td>
+            </tr>
+            <tr>
+              <td>ARC2</td>
+              <td>satellite + stations</td>
+              <td>illustrer le compromis homogénéité vs intensité locale</td>
+              <td><a href="https://www.chc.ucsb.edu/data/arc2" target="_blank" rel="noreferrer">ARC2</a></td>
+            </tr>
+            <tr>
+              <td>IMERG</td>
+              <td>satellite</td>
+              <td>produit pluie à plus forte résolution temporelle</td>
+              <td><a href="https://pmm.nasa.gov/GPM/imerg" target="_blank" rel="noreferrer">NASA PMM</a></td>
+            </tr>
+            <tr>
+              <td>ERA5 / ERA5-Land</td>
+              <td>réanalyse</td>
+              <td>séries multi-variables continues</td>
+              <td><a href="https://cds.climate.copernicus.eu/" target="_blank" rel="noreferrer">Copernicus CDS</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="grid-2">
+      <div class="panel">
+        <h2>Message méthodologique</h2>
+        <div class="callout">
+          La bonne pratique n’est pas de choisir une seule source “meilleure”, mais de choisir une combinaison adaptée à la question étudiée.
+        </div>
+        <ul>
+          <li>Conseil agricole local: stations si disponibles, puis correction par produit grille.</li>
+          <li>Études régionales: satellite et réanalyse pour la couverture, stations pour la validation.</li>
+          <li>Modélisation culturale: préférer des séries cohérentes multi-variables et documenter la correction appliquée.</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h2>Passerelle avec agrometflow</h2>
+        <p>Le package référence déjà plusieurs produits climatiques et facilite la logique “un outil, plusieurs sources”.</p>
+        <ul>
+          <li>Sources présentes dans le code: POWER, GHCN-D, CHIRPS, ARC2, TAMSAT, IMERG, PERSIANN, MSWEP, ERA5.</li>
+          <li>Notebooks de formation: voir la page <a href="notebooks.html">Notebooks</a>.</li>
+        </ul>
+      </div>
+    </section>
+
+    <footer class="footer">
+      Page de synthèse issue des sections “typologies de données” et “infrastructures d’accès” du support de formation.
+    </footer>
+  </div>
+</body>
+</html>

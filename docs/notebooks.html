@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Notebooks de formation | agrometflow</title>
+  <link rel="stylesheet" href="assets/course.css">
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">agrometflow · formation Cameroon</div>
+      <nav class="nav">
+        <a href="index.html">Accueil</a>
+        <a href="sources.html">Sources</a>
+        <a href="qualite.html">Contrôle qualité</a>
+        <a class="active" href="notebooks.html">Notebooks</a>
+      </nav>
+    </header>
+
+    <section class="panel">
+      <span class="eyebrow">Parcours pratique</span>
+      <h1>Notebooks prêts pour Binder</h1>
+      <p class="lead">
+        Les notebooks suivants sont conçus pour un usage pédagogique. Deux sont entièrement hors ligne, un est centré QC, et un dernier sert de démonstration de téléchargement réel.
+      </p>
+      <div class="actions">
+        <a class="button primary" href="https://mybinder.org/v2/gh/cyrillemidingoyi/agrometflow/HEAD?urlpath=lab/tree/notebooks/formation_cameroon" target="_blank" rel="noreferrer">Ouvrir le dossier dans Binder</a>
+        <a class="button" href="https://github.com/cyrillemidingoyi/agrometflow/tree/HEAD/notebooks/formation_cameroon" target="_blank" rel="noreferrer">Voir les fichiers sur GitHub</a>
+      </div>
+    </section>
+
+    <section class="card-grid">
+      <article class="card" id="nb-00">
+        <h2>00 · Parcours sources climatiques</h2>
+        <p>Notebook d’ouverture. Il introduit les familles de données et relie le discours du cours aux catalogues internes d’agrometflow.</p>
+        <p><strong>Usage:</strong> à projeter en début de séance ou à donner en lecture autonome.</p>
+        <div class="actions">
+          <a class="button primary" href="https://mybinder.org/v2/gh/cyrillemidingoyi/agrometflow/HEAD?urlpath=lab/tree/notebooks/formation_cameroon/00_parcours_sources_climatiques.ipynb" target="_blank" rel="noreferrer">Binder</a>
+          <a class="button" href="https://github.com/cyrillemidingoyi/agrometflow/blob/HEAD/notebooks/formation_cameroon/00_parcours_sources_climatiques.ipynb" target="_blank" rel="noreferrer">GitHub</a>
+        </div>
+      </article>
+
+      <article class="card" id="nb-01">
+        <h2>01 · Explorer les sources agrometflow</h2>
+        <p>Construit un tableau synthétique des produits, variables et résolutions référencés dans le package.</p>
+        <p><strong>Usage:</strong> exercice de découverte, sans accès internet aux portails externes.</p>
+        <div class="actions">
+          <a class="button primary" href="https://mybinder.org/v2/gh/cyrillemidingoyi/agrometflow/HEAD?urlpath=lab/tree/notebooks/formation_cameroon/01_explorer_les_sources_agrometflow.ipynb" target="_blank" rel="noreferrer">Binder</a>
+          <a class="button" href="https://github.com/cyrillemidingoyi/agrometflow/blob/HEAD/notebooks/formation_cameroon/01_explorer_les_sources_agrometflow.ipynb" target="_blank" rel="noreferrer">GitHub</a>
+        </div>
+      </article>
+
+      <article class="card" id="nb-02">
+        <h2>02 · Contrôle qualité journalier</h2>
+        <p>Utilise une mini-série climatique construite dans le notebook pour illustrer les principaux flags de QC.</p>
+        <p><strong>Usage:</strong> parfait pour une séance sans téléchargement ni préparation lourde.</p>
+        <div class="actions">
+          <a class="button primary" href="https://mybinder.org/v2/gh/cyrillemidingoyi/agrometflow/HEAD?urlpath=lab/tree/notebooks/formation_cameroon/02_controle_qualite_journalier.ipynb" target="_blank" rel="noreferrer">Binder</a>
+          <a class="button" href="https://github.com/cyrillemidingoyi/agrometflow/blob/HEAD/notebooks/formation_cameroon/02_controle_qualite_journalier.ipynb" target="_blank" rel="noreferrer">GitHub</a>
+        </div>
+      </article>
+
+      <article class="card" id="nb-03">
+        <h2>03 · Démarrage NASA POWER</h2>
+        <p>Démonstration de téléchargement de données journalières sur un point au Cameroun, avec extraction des variables utiles.</p>
+        <p><strong>Usage:</strong> démonstration live si la connexion internet est bonne.</p>
+        <div class="actions">
+          <a class="button primary" href="https://mybinder.org/v2/gh/cyrillemidingoyi/agrometflow/HEAD?urlpath=lab/tree/notebooks/formation_cameroon/03_demarrage_nasa_power.ipynb" target="_blank" rel="noreferrer">Binder</a>
+          <a class="button" href="https://github.com/cyrillemidingoyi/agrometflow/blob/HEAD/notebooks/formation_cameroon/03_demarrage_nasa_power.ipynb" target="_blank" rel="noreferrer">GitHub</a>
+        </div>
+      </article>
+    </section>
+
+    <section class="panel">
+      <h2>Ordre conseillé</h2>
+      <ul>
+        <li>Commencer par `00` puis `01` pour ancrer les concepts du cours.</li>
+        <li>Passer à `02` pour faire manipuler le contrôle qualité sans dépendre du réseau.</li>
+        <li>Terminer par `03` comme ouverture vers les téléchargements réels.</li>
+      </ul>
+    </section>
+
+    <footer class="footer">
+      Tous les liens Binder ciblent le dépôt GitHub actuel: <code>cyrillemidingoyi/agrometflow</code>.
+    </footer>
+  </div>
+</body>
+</html>
