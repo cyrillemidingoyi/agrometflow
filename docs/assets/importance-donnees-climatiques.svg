@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700" viewBox="0 0 1200 700" role="img" aria-labelledby="title desc">
+  <title id="title">Importance des donnees climatiques</title>
+  <desc id="desc">Schema simple reliant donnees climatiques, decisions et impacts.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#e7f6f2"/>
+      <stop offset="100%" stop-color="#f9f7e8"/>
+    </linearGradient>
+    <style>
+      .title { font: 700 44px "Segoe UI", Arial, sans-serif; fill: #13313d; }
+      .subtitle { font: 500 24px "Segoe UI", Arial, sans-serif; fill: #2e5563; }
+      .h { font: 700 24px "Segoe UI", Arial, sans-serif; fill: #0d3b66; }
+      .b { font: 500 19px "Segoe UI", Arial, sans-serif; fill: #1f3d48; }
+      .kpi { font: 700 26px "Segoe UI", Arial, sans-serif; fill: #7a4100; }
+      .small { font: 500 17px "Segoe UI", Arial, sans-serif; fill: #3d5963; }
+      .arrow { stroke: #2a9d8f; stroke-width: 8; fill: none; marker-end: url(#m); }
+    </style>
+    <marker id="m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2a9d8f"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1200" height="700" fill="url(#bg)"/>
+
+  <text x="60" y="80" class="title">Importance des donnees climatiques</text>
+  <text x="60" y="120" class="subtitle">Du signal climatique a la decision agronomique</text>
+
+  <rect x="60" y="180" width="320" height="260" rx="18" fill="#ffffff" stroke="#7cc9bb" stroke-width="3"/>
+  <text x="90" y="225" class="h">Donnees climatiques</text>
+  <text x="90" y="265" class="b">- Pluie</text>
+  <text x="90" y="300" class="b">- Temperature</text>
+  <text x="90" y="335" class="b">- Rayonnement</text>
+  <text x="90" y="370" class="b">- Vent / ET0</text>
+  <text x="90" y="410" class="small">Stations, satellite, reanalyse</text>
+
+  <rect x="440" y="180" width="320" height="260" rx="18" fill="#ffffff" stroke="#7cc9bb" stroke-width="3"/>
+  <text x="470" y="225" class="h">Analyses et modeles</text>
+  <text x="470" y="265" class="b">- Diagnostic saisonnier</text>
+  <text x="470" y="300" class="b">- Suivi des risques</text>
+  <text x="470" y="335" class="b">- Simulation culturale</text>
+  <text x="470" y="370" class="b">- Alerte precoce</text>
+  <text x="470" y="410" class="small">Qualite des intrants critique</text>
+
+  <rect x="820" y="180" width="320" height="260" rx="18" fill="#ffffff" stroke="#7cc9bb" stroke-width="3"/>
+  <text x="850" y="225" class="h">Decisions terrain</text>
+  <text x="850" y="265" class="b">- Date de semis</text>
+  <text x="850" y="300" class="b">- Irrigation</text>
+  <text x="850" y="335" class="b">- Fertilisation</text>
+  <text x="850" y="370" class="b">- Gestion du risque</text>
+  <text x="850" y="410" class="small">Conseil et planification</text>
+
+  <path d="M 390 310 L 430 310" class="arrow"/>
+  <path d="M 770 310 L 810 310" class="arrow"/>
+
+  <rect x="60" y="500" width="1080" height="130" rx="14" fill="#fff6dd" stroke="#f0c067" stroke-width="3"/>
+  <text x="95" y="550" class="kpi">Message cle :</text>
+  <text x="275" y="550" class="b">Sans controle qualite, les erreurs se propagent jusqu'aux decisions.</text>
+  <text x="95" y="590" class="b">Donnees fiables + typologie comprise + infrastructures maitrisees + QC robuste = decisions plus solides.</text>
+</svg>

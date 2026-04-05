@@ -24,17 +24,29 @@ Le contrôle qualité doit être systématique et cohérent. L'absence de systè
 - Variables: toutes.
 - Sorties: texte (lignes flaggées).
 
+![Exemple - dates/instants dupliqués (diapo 13)](assets/ppt_figures/slide13_figure.png)
+
+*Lecture pédagogique: un signalement indique un cas à vérifier dans la source d'origine avant toute correction.*
+
 ### 1.2 daily_repetition / subdaily_repetition
 
 - But: détecter des séquences de valeurs consécutives identiques.
 - Variables: toutes.
 - Sorties: texte.
 
+![Exemple - répétitions journalières/sous-journalières (diapo 14)](assets/ppt_figures/slide14_figure.png)
+
+*Lecture pédagogique: une répétition prolongée peut révéler une panne capteur ou une erreur de transmission.*
+
 ### 1.3 daily_out_of_range / subdaily_out_of_range
 
 - But: détecter les valeurs hors seuils définis.
 - Variables usuelles: Tx, Tn, rr, dd, w, sc, sd.
 - Sorties: texte.
+
+![Exemple - valeurs hors plage (diapo 15)](assets/ppt_figures/slide15_figure.png)
+
+*Lecture pédagogique: les seuils doivent être définis selon le contexte climatique local et la variable observée.*
 
 ### 1.4 wmo_gross_errors
 
@@ -50,6 +62,10 @@ Le contrôle qualité doit être systématique et cohérent. L'absence de systè
 - Variables: Tx, Tn, ta, rr, sc, sd, fs.
 - Principe: p25 - n*IQR < X < p75 + n*IQR.
 - Sorties: texte + figures (boxplots).
+
+![Exemple - climatic_outliers (diapo 17)](assets/ppt_figures/slide17_figure.png)
+
+*Lecture pédagogique: un outlier statistique n'est pas toujours faux, il doit être interprété avec le contexte météo.*
 
 ## 3. Cohérence temporelle
 

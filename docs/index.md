@@ -25,7 +25,15 @@ sans installation lourde sur les machines des apprenants.
 
 ## Ce que couvre la formation
 
-!!! example "1. Typologies de données"
+!!! example "1. Importance des données climatiques"
+
+    Sans données climatiques fiables, les décisions agronomiques (semis, fertilisation, irrigation, alerte sécheresse) deviennent incertaines.
+
+    ![Figure - Diapo 2 : importance des données climatiques](assets/ppt_figures/slide2_importance_donnees_climatiques.png)
+
+    **Message clé :** qualité des décisions = qualité des données + qualité du contrôle qualité.
+
+!!! example "2. Typologies de données"
 
     Observations in situ, télédétection, réanalyses et projections climatiques.
 
@@ -33,13 +41,13 @@ sans installation lourde sur les machines des apprenants.
 
     **[:octicons-arrow-right-24: Voir les sources de données](sources.md)**
 
-!!! example "2. Infrastructures d'accès"
+!!! example "3. Infrastructures d'accès"
 
     GHCN-D, GSOD, NASA POWER, CHIRPS, IMERG, ARC2, ERA5, ERA5-Land, MERRA-2 et autres produits déjà présents dans agrometflow.
 
     **[:octicons-arrow-right-24: Voir les sources de données](sources.md)**
 
-!!! example "3. Contrôle qualité"
+!!! example "4. Contrôle qualité"
 
     Chaîne QC complète : détection, vérification à la source, correction traçable, relance des tests, ajout des flags.
 
@@ -49,21 +57,25 @@ sans installation lourde sur les machines des apprenants.
 
 ## Parcours pédagogique proposé
 
-!!! note "Étape 1 · Cadre conceptuel"
+!!! note "Étape 1 · Importance des données climatiques"
+
+    Poser l'enjeu métier : une donnée inadaptée ou non contrôlée peut induire un mauvais diagnostic agroclimatique.
+
+!!! note "Étape 2 · Typologies de données"
 
     Présenter les typologies de sources et les compromis : couverture, résolution, biais, métadonnées, disponibilité opérationnelle.
 
-!!! note "Étape 2 · Lecture des catalogues"
+!!! note "Étape 3 · Infrastructures d'accès"
 
     Montrer comment agrometflow référence déjà plusieurs produits utiles pour la pluviométrie, la température et l'analyse agroclimatique.
 
-!!! note "Étape 3 · Étude pratique"
+!!! note "Étape 4 · Contrôle qualité"
 
-    Faire manipuler des notebooks courts : exploration des sources, téléchargement léger NASA POWER, contrôle qualité journalier.
+    Introduire la chaîne QC complète : détecter, vérifier à la source, corriger de manière traçable, relancer les tests.
 
-!!! note "Étape 4 · Discussion métier"
+!!! note "Étape 5 · Étude pratique et discussion métier"
 
-    Comparer ce qui est acceptable pour le suivi saisonnier, le conseil agricole, la recherche et la calibration de modèles.
+    Faire manipuler des notebooks courts, puis comparer ce qui est acceptable pour le suivi saisonnier, le conseil agricole, la recherche et la calibration de modèles.
 
 ---
 
@@ -82,7 +94,7 @@ sans installation lourde sur les machines des apprenants.
 ## Format de séance conseillé
 
 | Durée | Contenu |
-|-------|---------|
+| ----- | ------- |
 | **30 min** | Cadrage sur les familles de données climatiques |
 | **30 min** | Portails et produits utiles en Afrique centrale et de l'Ouest |
 | **45 min** | Démonstration agrometflow avec Binder |
@@ -97,7 +109,7 @@ sans installation lourde sur les machines des apprenants.
 ## Raccourcis vers les notebooks
 
 | Notebook | Objectif | Niveau | Mode |
-|----------|----------|--------|------|
+| -------- | -------- | ------ | ---- |
 | [00 · Parcours sources climatiques](notebooks.md) | Lien entre le cours et les catalogues internes d'agrometflow | :material-star: débutant | hors ligne |
 | [01 · Explorer les sources agrometflow](notebooks.md) | Comparer produits, variables et liens utiles | :material-star: débutant | hors ligne |
 | [02 · Contrôle qualité journalier](notebooks.md) | Comprendre les flags à partir d'une série simple | :material-star-half-full: intermédiaire | hors ligne |
