@@ -6,7 +6,7 @@ Le contrôle qualité doit être systématique et cohérent. L'absence de systè
 
 ## Chaîne de contrôle recommandée
 
-![Workflow QC - chaîne de contrôle (diapo 12)](assets/ppt_figures/slide12_chaine_controle_qualite.svg)
+![Workflow QC - chaîne de contrôle (diapo 12)](assets/ppt_figures/slide12_chaine_controle_qualite.png)
 
 *Lecture pédagogique: après conversion au format commun, on relance les tests; si des valeurs suspectes subsistent, on affine puis on boucle.*
 
