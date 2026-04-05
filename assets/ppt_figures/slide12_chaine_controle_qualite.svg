@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="920" viewBox="0 0 1400 920" role="img" aria-labelledby="title desc">
+  <title id="title">Chaine de controle de qualite</title>
+  <desc id="desc">Workflow en 7 etapes avec une decision Oui/Non pour relancer les tests.</desc>
+
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; }
+      .box { fill: #ffffff; stroke: #0f766e; stroke-width: 2.5; rx: 14; ry: 14; }
+      .diamond { fill: #fff7ed; stroke: #c2410c; stroke-width: 2.5; }
+      .txt { fill: #0f172a; font-family: "DejaVu Sans", Arial, sans-serif; font-size: 26px; }
+      .txt-sm { fill: #334155; font-family: "DejaVu Sans", Arial, sans-serif; font-size: 22px; }
+      .label { fill: #0f172a; font-family: "DejaVu Sans", Arial, sans-serif; font-size: 24px; font-weight: 700; }
+      .arrow { stroke: #0f766e; stroke-width: 4; fill: none; marker-end: url(#head); }
+      .arrow-alt { stroke: #c2410c; stroke-width: 4; fill: none; marker-end: url(#headAlt); }
+    </style>
+    <marker id="head" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#0f766e" />
+    </marker>
+    <marker id="headAlt" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#c2410c" />
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1400" height="920" />
+
+  <text class="label" x="700" y="60" text-anchor="middle">Chaine de controle de qualite (d'apres la diapo 12)</text>
+
+  <rect class="box" x="120" y="100" width="1160" height="92" />
+  <text class="txt" x="700" y="157" text-anchor="middle">1. Formater les donnees et appliquer les tests de qualite</text>
+
+  <rect class="box" x="120" y="230" width="1160" height="92" />
+  <text class="txt" x="700" y="287" text-anchor="middle">2. Verifier les valeurs suspectes dans la source d'origine</text>
+
+  <rect class="box" x="120" y="360" width="1160" height="92" />
+  <text class="txt" x="700" y="417" text-anchor="middle">3. Corriger les erreurs dans une copie de travail</text>
+
+  <rect class="box" x="120" y="490" width="1160" height="92" />
+  <text class="txt" x="700" y="547" text-anchor="middle">4. Convertir le nouveau fichier dans le format commun</text>
+
+  <polygon class="diamond" points="700,640 930,730 700,820 470,730" />
+  <text class="txt" x="700" y="715" text-anchor="middle">Reste-t-il des valeurs suspectes ?</text>
+
+  <rect class="box" x="120" y="840" width="560" height="60" />
+  <text class="txt-sm" x="400" y="878" text-anchor="middle">6. Affiner les sorties des tests</text>
+
+  <rect class="box" x="720" y="840" width="560" height="60" />
+  <text class="txt-sm" x="1000" y="878" text-anchor="middle">7. Ajouter les flags au jeu final</text>
+
+  <path class="arrow" d="M700 192 L700 230" />
+  <path class="arrow" d="M700 322 L700 360" />
+  <path class="arrow" d="M700 452 L700 490" />
+  <path class="arrow" d="M700 582 L700 640" />
+
+  <path class="arrow-alt" d="M700 820 L700 898 L720 898" />
+  <text class="label" x="735" y="820">Non</text>
+
+  <path class="arrow-alt" d="M470 730 L400 730 L400 840" />
+  <text class="label" x="355" y="720">Oui</text>
+
+  <path class="arrow" d="M400 900 L400 915 L700 915 L700 830" />
+</svg>

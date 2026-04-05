@@ -55,6 +55,8 @@
       
     
     
+      <link rel="stylesheet" href="../assets/stylesheets/zoom.css">
+    
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
@@ -456,13 +458,41 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#14-wmo_gross_errors" class="md-nav__link">
+  <a href="#14-erreurs-grossieres-omm-wmo_gross_error" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1.4 wmo_gross_errors
+        1.4 Erreurs grossières OMM (wmo_gross_error)
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="1.4 Erreurs grossières OMM (wmo_gross_error)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hiver-hn-ete-hs-octobre-novembre-decembre-janvier-fevrier-mars" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hiver HN, Eté HS (Octobre, Novembre, décembre, janvier, Février, Mars)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ete-hn-hiver-hs-avril-mai-juin-juillet-aout-septembre" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Eté HN, Hiver HS (Avril, Mai, Juin, Juillet, Août, Septembre)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -624,6 +654,8 @@
 <h2 id="pourquoi-un-systeme-qc-explicite">Pourquoi un système QC explicite<a class="headerlink" href="#pourquoi-un-systeme-qc-explicite" title="Permanent link">&para;</a></h2>
 <p>Le contrôle qualité doit être systématique et cohérent. L'absence de système de gestion de la qualité peut conduire à la perte de données d'origine ou à l'introduction d'erreurs supplémentaires.</p>
 <h2 id="chaine-de-controle-recommandee">Chaîne de contrôle recommandée<a class="headerlink" href="#chaine-de-controle-recommandee" title="Permanent link">&para;</a></h2>
+<p><img alt="Workflow QC - chaîne de contrôle (diapo 12)" src="../assets/ppt_figures/slide12_chaine_controle_qualite.svg" /></p>
+<p><em>Lecture pédagogique: après conversion au format commun, on relance les tests; si des valeurs suspectes subsistent, on affine puis on boucle.</em></p>
 <ol>
 <li>Formater les données et appliquer les tests QC.</li>
 <li>Vérifier les valeurs suspectes dans la source d'origine.</li>
@@ -659,11 +691,20 @@
 </ul>
 <p><img alt="Exemple - valeurs hors plage (diapo 15)" src="../assets/ppt_figures/slide15_figure.png" /></p>
 <p><em>Lecture pédagogique: les seuils doivent être définis selon le contexte climatique local et la variable observée.</em></p>
-<h3 id="14-wmo_gross_errors">1.4 wmo_gross_errors<a class="headerlink" href="#14-wmo_gross_errors" title="Permanent link">&para;</a></h3>
+<h3 id="14-erreurs-grossieres-omm-wmo_gross_error">1.4 Erreurs grossières OMM (wmo_gross_error)<a class="headerlink" href="#14-erreurs-grossieres-omm-wmo_gross_error" title="Permanent link">&para;</a></h3>
+<p>Description: détecte les observations dépassant des limites recommandées par l’Organisation Météorologique Mondiale. Ces limites dépendent de la latitude et de la saison</p>
+<p>Variables: Tx, Tn, ta, w, td, p, mslp</p>
+<p>Sorties: Sous forme de texte</p>
+<p>Pour latitude &lt;= 45° et latitude &gt;= -45°:</p>
+<h4 id="hiver-hn-ete-hs-octobre-novembre-decembre-janvier-fevrier-mars">Hiver HN, Eté HS (Octobre, Novembre, décembre, janvier, Février, Mars)<a class="headerlink" href="#hiver-hn-ete-hs-octobre-novembre-decembre-janvier-fevrier-mars" title="Permanent link">&para;</a></h4>
 <ul>
-<li>But: détecter les valeurs hors bornes OMM selon latitude et saison.</li>
-<li>Variables usuelles: ta, td, w, p, mslp.</li>
-<li>Sorties: texte.</li>
+<li>Valeurs suspectes: <code>-40 &lt;= ta &lt; -30 ou 50 &lt; ta &lt;= 55</code></li>
+<li>Valeurs erronées: <code>ta &lt; -40 ou ta &gt; 55</code></li>
+</ul>
+<h4 id="ete-hn-hiver-hs-avril-mai-juin-juillet-aout-septembre">Eté HN, Hiver HS (Avril, Mai, Juin, Juillet, Août, Septembre)<a class="headerlink" href="#ete-hn-hiver-hs-avril-mai-juin-juillet-aout-septembre" title="Permanent link">&para;</a></h4>
+<ul>
+<li>Valeurs suspectes: <code>-30 &lt;= ta &lt; -20 or 50 &lt; ta &lt;= 60</code></li>
+<li>Valeurs erronées: <code>ta &lt; -30 or ta &gt; 60</code></li>
 </ul>
 <h2 id="2-tolerance-statistique">2. Tolérance statistique<a class="headerlink" href="#2-tolerance-statistique" title="Permanent link">&para;</a></h2>
 <h3 id="climatic_outliers">climatic_outliers<a class="headerlink" href="#climatic_outliers" title="Permanent link">&para;</a></h3>
@@ -759,6 +800,8 @@
     
     
       <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../assets/javascripts/zoom.js"></script>
       
     
   </body>

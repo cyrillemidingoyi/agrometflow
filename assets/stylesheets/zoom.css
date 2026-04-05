@@ -1,0 +1,32 @@
+.md-typeset img.zoomable {
+  cursor: zoom-in;
+  transition: transform 0.15s ease;
+}
+
+.md-typeset img.zoomable:hover {
+  transform: scale(1.01);
+}
+
+.zoom-modal {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.82);
+  z-index: 9999;
+  padding: 2rem;
+}
+
+.zoom-modal.is-open {
+  display: flex;
+}
+
+.zoom-modal img {
+  max-width: min(95vw, 1600px);
+  max-height: 90vh;
+  width: auto;
+  height: auto;
+  border-radius: 6px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+}
