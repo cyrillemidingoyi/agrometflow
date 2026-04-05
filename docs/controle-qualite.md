@@ -6,6 +6,10 @@ Le contrôle qualité doit être systématique et cohérent. L'absence de systè
 
 ## Chaîne de contrôle recommandée
 
+![Workflow QC - chaîne de contrôle (diapo 12)](assets/ppt_figures/slide12_chaine_controle_qualite.svg)
+
+*Lecture pédagogique: après conversion au format commun, on relance les tests; si des valeurs suspectes subsistent, on affine puis on boucle.*
+
 1. Formater les données et appliquer les tests QC.
 2. Vérifier les valeurs suspectes dans la source d'origine.
 3. Corriger dans une copie de travail (pas dans le brut).
@@ -48,11 +52,25 @@ Le contrôle qualité doit être systématique et cohérent. L'absence de systè
 
 *Lecture pédagogique: les seuils doivent être définis selon le contexte climatique local et la variable observée.*
 
-### 1.4 wmo_gross_errors
+### 1.4 Erreurs grossières OMM (wmo_gross_error)
 
-- But: détecter les valeurs hors bornes OMM selon latitude et saison.
-- Variables usuelles: ta, td, w, p, mslp.
-- Sorties: texte.
+Description: détecte les observations dépassant des limites recommandées par l’Organisation Météorologique Mondiale. Ces limites dépendent de la latitude et de la saison
+
+Variables: Tx, Tn, ta, w, td, p, mslp
+
+Sorties: Sous forme de texte
+
+Pour latitude <= 45° et latitude >= -45°:
+
+#### Hiver HN, Eté HS (Octobre, Novembre, décembre, janvier, Février, Mars)
+
+- Valeurs suspectes: `-40 <= ta < -30 ou 50 < ta <= 55`
+- Valeurs erronées: `ta < -40 ou ta > 55`
+
+#### Eté HN, Hiver HS (Avril, Mai, Juin, Juillet, Août, Septembre)
+
+- Valeurs suspectes: `-30 <= ta < -20 or 50 < ta <= 60`
+- Valeurs erronées: `ta < -30 or ta > 60`
 
 ## 2. Tolérance statistique
 
