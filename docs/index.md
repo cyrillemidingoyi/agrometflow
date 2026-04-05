@@ -29,7 +29,7 @@ sans installation lourde sur les machines des apprenants.
 
     Sans données climatiques fiables, les décisions agronomiques (semis, fertilisation, irrigation, alerte sécheresse) deviennent incertaines.
 
-    ![Figure - Diapo 2 : importance des données climatiques](assets/ppt_figures/slide2_importance_donnees_climatiques.png)
+    [![Figure - Diapo 2 : importance des données climatiques](assets/ppt_figures/slide2_importance_donnees_climatiques.png)](assets/ppt_figures/slide2_importance_donnees_climatiques.png)
 
     **Message clé :** qualité des décisions = qualité des données + qualité du contrôle qualité.
 
