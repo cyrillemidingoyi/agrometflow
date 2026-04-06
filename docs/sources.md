@@ -8,9 +8,11 @@ Sans une base de donnees fiable et bien documentee, les analyses peuvent conduir
 
 ## 1) Typologie des donnees
 
+<!-- markdownlint-disable MD024 -->
+
 ### 1.1 Observations in situ
 
-#### Description - In situ
+#### Description
 
 Mesures directes considerees comme reference:
 
@@ -18,12 +20,12 @@ Mesures directes considerees comme reference:
 - stations automatiques
 - postes pluviometriques
 
-#### Forces - In situ
+#### Forces
 
 - reference terrain pour la validation
 - utiles pour la calibration locale
 
-#### Limites - In situ
+#### Limites
 
 - faible densite spatiale dans plusieurs regions
 - metadonnees parfois incompletes
@@ -31,16 +33,16 @@ Mesures directes considerees comme reference:
 
 ### 1.2 Teledetection
 
-#### Description - Teledetection
+#### Description
 
 Mesures indirectes satellitaires ou radar, generalement fusionnees avec des observations in situ.
 
-#### Forces - Teledetection
+#### Forces
 
 - tres bonne couverture spatiale
 - utile pour le suivi regional de la pluie
 
-#### Limites - Teledetection
+#### Limites
 
 - incertitudes selon climat, saison et surface
 - biais regionaux persistants
@@ -48,16 +50,24 @@ Mesures indirectes satellitaires ou radar, generalement fusionnees avec des obse
 
 ### 1.3 Reanalyses et projections
 
-#### Description - Reanalyses et projections
+#### Description
 
 - Reanalyses: assimilation des observations pour reconstruire un etat coherent du passe.
 - Projections: evolution possible du climat selon differents scenarios.
 
-#### Limites - Reanalyses et projections
+#### Forces
+
+- series coherentes sur de longues periodes
+- couverture spatiale et temporelle continue
+- approche multi-variables utile pour l'analyse agroclimatique
+
+#### Limites
 
 - biais dependants des variables et des regions
 - resolution souvent trop grossiere pour certains usages locaux
 - incertitudes liees aux objectifs de l'etude
+
+<!-- markdownlint-enable MD024 -->
 
 ## 2) Infrastructures d'acces aux donnees
 
