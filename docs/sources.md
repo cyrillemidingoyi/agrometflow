@@ -10,7 +10,7 @@ Sans une base de donnees fiable et bien documentee, les analyses peuvent conduir
 
 ### 1.1 Observations in situ
 
-#### Description (Observations in situ)
+#### Description - In situ
 
 Mesures directes considerees comme reference:
 
@@ -18,12 +18,12 @@ Mesures directes considerees comme reference:
 - stations automatiques
 - postes pluviometriques
 
-#### Forces (Observations in situ)
+#### Forces - In situ
 
 - reference terrain pour la validation
 - utiles pour la calibration locale
 
-#### Limites (Observations in situ)
+#### Limites - In situ
 
 - faible densite spatiale dans plusieurs regions
 - metadonnees parfois incompletes
@@ -31,16 +31,16 @@ Mesures directes considerees comme reference:
 
 ### 1.2 Teledetection
 
-#### Description (Teledetection)
+#### Description - Teledetection
 
 Mesures indirectes satellitaires ou radar, generalement fusionnees avec des observations in situ.
 
-#### Forces (Teledetection)
+#### Forces - Teledetection
 
 - tres bonne couverture spatiale
 - utile pour le suivi regional de la pluie
 
-#### Limites (Teledetection)
+#### Limites - Teledetection
 
 - incertitudes selon climat, saison et surface
 - biais regionaux persistants
@@ -48,12 +48,12 @@ Mesures indirectes satellitaires ou radar, generalement fusionnees avec des obse
 
 ### 1.3 Reanalyses et projections
 
-#### Description (Reanalyses et projections)
+#### Description - Reanalyses et projections
 
 - Reanalyses: assimilation des observations pour reconstruire un etat coherent du passe.
 - Projections: evolution possible du climat selon differents scenarios.
 
-#### Limites (Reanalyses et projections)
+#### Limites - Reanalyses et projections
 
 - biais dependants des variables et des regions
 - resolution souvent trop grossiere pour certains usages locaux
