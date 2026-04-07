@@ -1,0 +1,5 @@
+station	Var	Year	Month	Day	Value	Test
+GHM00065460	Tx	2018	4	20	34.5	daily_repetition
+GHM00065460	Tx	2018	4	21	34.5	daily_repetition
+GHM00065460	Tx	2018	4	22	34.5	daily_repetition
+GHM00065460	Tx	2018	4	23	34.5	daily_repetition

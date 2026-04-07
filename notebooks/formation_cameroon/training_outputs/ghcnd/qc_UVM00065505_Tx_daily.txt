@@ -1,0 +1,14 @@
+Var	Year	Month	Day	Value	Test
+Tx	2001	11	12	30.7	climatic_outliers
+Tx	2003	3	22	30.8	climatic_outliers
+Tx	2003	3	23	28.6	climatic_outliers
+Tx	2009	3	20	33.0	climatic_outliers
+Tx	2012	3	10	32.5	climatic_outliers
+Tx	2012	4	28	47.0	daily_out_of_range
+Tx	2014	3	1	32.2	climatic_outliers
+Tx	2016	2	8	35.0	daily_repetition
+Tx	2016	2	9	35.0	daily_repetition
+Tx	2016	2	10	35.0	daily_repetition
+Tx	2016	2	11	35.0	daily_repetition
+Tx	2016	4	9	31.6	climatic_outliers
+Tx	2016	4	13	45.2	daily_out_of_range

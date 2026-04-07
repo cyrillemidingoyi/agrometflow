@@ -1,0 +1,5 @@
+station	Var	Year	Month	Day	Value	Test
+TOM00065357	Tn	2001	10	28	17.5	climatic_outliers
+TOM00065357	Tn	2002	3	23	16.5	climatic_outliers
+TOM00065357	Tn	2017	10	28	17.8	climatic_outliers
+TOM00065357	Tn	2020	10	28	17.8	climatic_outliers

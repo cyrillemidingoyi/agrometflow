@@ -1,0 +1,3 @@
+station	Var	Year	Month	Day	Value	Test
+BN000065335	rr	2001	5	27	102.1	climatic_outliers
+BN000065335	rr	2006	8	2	102.1	climatic_outliers

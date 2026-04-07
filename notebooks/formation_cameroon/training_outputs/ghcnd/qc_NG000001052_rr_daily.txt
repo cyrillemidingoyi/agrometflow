@@ -1,0 +1,6 @@
+Var	Year	Month	Day	Value	Test
+rr	2012	8	19	119.1	climatic_outliers
+rr	2016	6	10	463.0	climatic_outliers;daily_out_of_range
+rr	2017	5	11	99.1	climatic_outliers
+rr	2017	6	14	135.9	climatic_outliers
+rr	2017	8	23	383.0	climatic_outliers;daily_out_of_range

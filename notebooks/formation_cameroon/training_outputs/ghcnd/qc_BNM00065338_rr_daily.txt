@@ -1,0 +1,5 @@
+station	Var	Year	Month	Day	Value	Test
+BNM00065338	rr	2008	7	27	129.0	climatic_outliers
+BNM00065338	rr	2008	8	15	55.9	climatic_outliers
+BNM00065338	rr	2014	9	24	131.1	climatic_outliers
+BNM00065338	rr	2017	8	5	59.9	climatic_outliers

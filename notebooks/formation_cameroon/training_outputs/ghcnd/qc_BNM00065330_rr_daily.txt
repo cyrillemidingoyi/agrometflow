@@ -1,0 +1,6 @@
+station	Var	Year	Month	Day	Value	Test
+BNM00065330	rr	2000	7	20	151.9	climatic_outliers
+BNM00065330	rr	2013	10	8	86.1	climatic_outliers
+BNM00065330	rr	2018	8	25	124.0	climatic_outliers
+BNM00065330	rr	2019	1	25	79.0	climatic_outliers
+BNM00065330	rr	2019	7	23	84.1	climatic_outliers

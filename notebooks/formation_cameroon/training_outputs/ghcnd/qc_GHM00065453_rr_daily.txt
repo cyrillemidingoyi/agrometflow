@@ -1,0 +1,3 @@
+station	Var	Year	Month	Day	Value	Test
+GHM00065453	rr	2008	7	20	461.3	daily_out_of_range
+GHM00065453	rr	2010	8	25	451.1	daily_out_of_range

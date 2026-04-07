@@ -1,0 +1,5 @@
+Var	Year	Month	Day	Value	Test
+Tx	2008	5	30	27.3	climatic_outliers
+Tx	2012	3	10	32.9	climatic_outliers
+Tx	2013	4	26	30.9	climatic_outliers
+Tx	2017	4	11	50.0	climatic_outliers;daily_out_of_range

@@ -1,0 +1,7 @@
+station	Var	Year	Month	Day	Value	Test
+BN000005319	Tx	2002	4	7	27.7	climatic_outliers
+BN000005319	Tx	2004	1	21	25.2	climatic_outliers
+BN000005319	Tx	2007	4	7	26.4	climatic_outliers
+BN000005319	Tx	2009	4	13	25.2	climatic_outliers
+BN000005319	Tx	2014	3	31	30.2	climatic_outliers
+BN000005319	Tx	2018	8	2	39.0	climatic_outliers

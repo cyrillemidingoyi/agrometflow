@@ -1,0 +1,4 @@
+station	Var	Year	Month	Day	Value	Test
+TOM00065352	rr	2005	7	11	130.0	climatic_outliers
+TOM00065352	rr	2010	6	10	79.0	climatic_outliers
+TOM00065352	rr	2015	2	22	13.0	climatic_outliers

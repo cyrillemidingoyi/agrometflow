@@ -114,3 +114,4 @@ sans installation lourde sur les machines des apprenants.
 | [01 · Explorer les sources agrometflow](notebooks.md) | Comparer produits, variables et liens utiles | :material-star: débutant | hors ligne |
 | [02 · Contrôle qualité journalier](notebooks.md) | Comprendre les flags à partir d'une série simple | :material-star-half-full: intermédiaire | hors ligne |
 | [03 · Démarrage NASA POWER](notebooks.md) | Premier téléchargement réel sur un point au Cameroun | :material-star-half-full: intermédiaire | internet requis |
+| [04 · Contrôle qualité avancé](notebooks.md) | Appliquer les diagnostics avancés et les tests WMO sur cas réel et synthétique | :material-star-three-points: avancé | internet requis |

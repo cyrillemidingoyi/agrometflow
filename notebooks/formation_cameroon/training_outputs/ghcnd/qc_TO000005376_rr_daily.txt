@@ -1,0 +1,9 @@
+Var	Year	Month	Day	Value	Test
+rr	2005	4	23	180.8	climatic_outliers
+rr	2005	8	7	221.0	climatic_outliers;daily_out_of_range
+rr	2006	7	15	118.1	climatic_outliers
+rr	2009	1	10	59.9	climatic_outliers
+rr	2009	3	29	85.1	climatic_outliers
+rr	2009	6	16	119.9	climatic_outliers
+rr	2011	7	18	131.1	climatic_outliers
+rr	2020	4	24	181.4	climatic_outliers

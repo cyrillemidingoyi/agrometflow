@@ -1,0 +1,2 @@
+station	Var	Year	Month	Day	Value	Test
+TOM00065355	rr	2003	8	8	101.1	climatic_outliers

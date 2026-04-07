@@ -1,0 +1,14 @@
+station	Var	Year	Month	Day	Value	Test
+BN000005344	rr	2000	11	2	89.9	climatic_outliers
+BN000005344	rr	2003	4	15	194.1	climatic_outliers
+BN000005344	rr	2005	5	31	118.1	climatic_outliers
+BN000005344	rr	2005	8	29	63.0	climatic_outliers
+BN000005344	rr	2007	12	9	85.1	climatic_outliers
+BN000005344	rr	2010	8	17	23.9	climatic_outliers
+BN000005344	rr	2010	11	6	83.1	climatic_outliers
+BN000005344	rr	2011	2	19	67.1	climatic_outliers
+BN000005344	rr	2012	9	28	97.0	climatic_outliers
+BN000005344	rr	2014	8	26	41.9	climatic_outliers
+BN000005344	rr	2016	10	9	104.9	climatic_outliers
+BN000005344	rr	2018	8	21	65.0	climatic_outliers
+BN000005344	rr	2018	9	8	158.0	climatic_outliers

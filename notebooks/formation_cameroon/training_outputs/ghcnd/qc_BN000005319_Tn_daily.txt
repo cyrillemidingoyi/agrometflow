@@ -1,0 +1,9 @@
+station	Var	Year	Month	Day	Value	Test
+BN000005319	Tn	2001	10	22	19.5	daily_repetition
+BN000005319	Tn	2001	10	23	19.5	daily_repetition
+BN000005319	Tn	2001	10	24	19.5	daily_repetition
+BN000005319	Tn	2001	10	25	19.5	daily_repetition
+BN000005319	Tn	2004	10	9	22.0	daily_repetition
+BN000005319	Tn	2004	10	10	22.0	daily_repetition
+BN000005319	Tn	2004	10	11	22.0	daily_repetition
+BN000005319	Tn	2004	10	12	22.0	daily_repetition

@@ -1,0 +1,11 @@
+station	Var	Year	Month	Day	Value	Test
+TOM00065387	rr	2004	9	30	52.1	climatic_outliers
+TOM00065387	rr	2005	8	29	55.9	climatic_outliers
+TOM00065387	rr	2007	7	21	77.0	climatic_outliers
+TOM00065387	rr	2010	6	10	122.9	climatic_outliers
+TOM00065387	rr	2010	9	19	78.0	climatic_outliers
+TOM00065387	rr	2010	9	24	41.9	climatic_outliers
+TOM00065387	rr	2012	6	29	106.9	climatic_outliers
+TOM00065387	rr	2013	9	18	84.8	climatic_outliers
+TOM00065387	rr	2018	7	14	62.0	climatic_outliers
+TOM00065387	rr	2019	9	2	39.9	climatic_outliers

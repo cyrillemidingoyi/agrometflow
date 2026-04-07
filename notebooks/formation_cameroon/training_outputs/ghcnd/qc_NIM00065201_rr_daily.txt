@@ -1,0 +1,7 @@
+station	Var	Year	Month	Day	Value	Test
+NIM00065201	rr	2005	10	10	299.7	daily_out_of_range
+NIM00065201	rr	2006	5	13	330.2	daily_out_of_range
+NIM00065201	rr	2006	7	13	270.5	daily_out_of_range
+NIM00065201	rr	2009	9	10	456.2	daily_out_of_range
+NIM00065201	rr	2015	8	8	224.0	daily_out_of_range
+NIM00065201	rr	2018	11	27	361.2	daily_out_of_range

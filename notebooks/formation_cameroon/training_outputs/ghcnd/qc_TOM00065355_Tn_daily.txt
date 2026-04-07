@@ -1,0 +1,4 @@
+station	Var	Year	Month	Day	Value	Test
+TOM00065355	Tn	2003	7	22	13.0	climatic_outliers
+TOM00065355	Tn	2004	3	5	11.5	climatic_outliers
+TOM00065355	Tn	2012	9	21	10.5	climatic_outliers

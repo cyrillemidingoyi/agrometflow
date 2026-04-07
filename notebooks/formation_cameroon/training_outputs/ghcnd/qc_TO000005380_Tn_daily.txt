@@ -1,0 +1,5 @@
+station	Var	Year	Month	Day	Value	Test
+TO000005380	Tn	2000	2	10	17.0	climatic_outliers
+TO000005380	Tn	2004	10	17	12.2	climatic_outliers
+TO000005380	Tn	2015	12	20	11.8	climatic_outliers
+TO000005380	Tn	2019	5	13	17.0	climatic_outliers

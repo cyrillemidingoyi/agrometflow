@@ -53,6 +53,18 @@ Niveau:
 - intermédiaire
 - internet requis
 
+## 04 - Contrôle qualité avancé
+
+Objectif:
+
+- appliquer les fonctions avancées de contrôle qualité (daily, decimals, weekly cycle, subdaily)
+- explorer des cas multi-stations et le test WMO gross errors
+
+Niveau:
+
+- avancé
+- internet requis
+
 ## Conseil logistique
 
-En cas de connexion instable, privilégier les notebooks 00-02 (hors ligne) et garder 03 en démonstration magistrale.
+En cas de connexion instable, privilégier les notebooks 00-02 (hors ligne) et garder 03-04 en démonstration magistrale.

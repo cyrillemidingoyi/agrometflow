@@ -1,0 +1,12 @@
+Var	Year	Month	Day	Value	Test
+Tx	2000	3	20	29.4	climatic_outliers
+Tx	2000	11	6	34.5	daily_repetition
+Tx	2000	11	7	34.5	daily_repetition
+Tx	2000	11	8	34.5	daily_repetition
+Tx	2000	11	9	34.5	daily_repetition
+Tx	2004	1	21	28.0	climatic_outliers
+Tx	2006	3	22	29.7	climatic_outliers
+Tx	2012	2	21	29.6	climatic_outliers
+Tx	2014	11	4	28.0	climatic_outliers
+Tx	2014	11	5	27.3	climatic_outliers
+Tx	2018	2	26	30.6	climatic_outliers

@@ -1,0 +1,13 @@
+station	Var	Year	Month	Day	Value	Test
+NIM00065201	Tx	2000	12	21	27.4	climatic_outliers
+NIM00065201	Tx	2005	2	6	26.5	climatic_outliers
+NIM00065201	Tx	2005	5	30	26.0	climatic_outliers
+NIM00065201	Tx	2006	4	29	39.6	climatic_outliers
+NIM00065201	Tx	2006	5	28	25.4	climatic_outliers
+NIM00065201	Tx	2007	6	22	37.6	climatic_outliers
+NIM00065201	Tx	2009	4	13	27.3	climatic_outliers
+NIM00065201	Tx	2011	4	4	28.0	climatic_outliers
+NIM00065201	Tx	2012	11	9	26.6	climatic_outliers
+NIM00065201	Tx	2013	3	28	28.5	climatic_outliers
+NIM00065201	Tx	2015	11	29	39.9	climatic_outliers
+NIM00065201	Tx	2018	4	2	40.8	climatic_outliers

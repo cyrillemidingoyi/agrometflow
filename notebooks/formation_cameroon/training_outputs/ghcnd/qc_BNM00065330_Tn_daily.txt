@@ -1,0 +1,3 @@
+station	Var	Year	Month	Day	Value	Test
+BNM00065330	Tn	2009	3	29	19.8	climatic_outliers
+BNM00065330	Tn	2014	8	9	14.4	climatic_outliers

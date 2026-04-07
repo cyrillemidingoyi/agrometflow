@@ -1,0 +1,2 @@
+station	Var	Year	Month	Day	Value	Test
+BN000065335	Tn	2006	11	28	17.5	climatic_outliers

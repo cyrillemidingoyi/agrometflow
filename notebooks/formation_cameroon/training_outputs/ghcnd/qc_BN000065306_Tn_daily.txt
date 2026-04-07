@@ -1,0 +1,10 @@
+Var	Year	Month	Day	Value	Test
+Tn	2004	3	30	31.0	daily_out_of_range
+Tn	2005	3	6	31.0	daily_out_of_range
+Tn	2005	4	15	30.2	daily_out_of_range
+Tn	2007	4	4	30.9	daily_out_of_range
+Tn	2010	4	14	30.4	daily_out_of_range
+Tn	2015	3	21	30.2	daily_out_of_range
+Tn	2015	9	8	16.6	climatic_outliers
+Tn	2016	3	22	30.4	daily_out_of_range
+Tn	2019	4	22	30.4	daily_out_of_range

@@ -1,0 +1,10 @@
+Var	Year	Month	Day	Value	Test
+Tn	2000	6	26	21.5	daily_repetition
+Tn	2000	6	27	21.5	daily_repetition
+Tn	2000	6	28	21.5	daily_repetition
+Tn	2000	6	29	21.5	daily_repetition
+Tn	2006	7	8	11.1	climatic_outliers
+Tn	2011	4	19	24.0	daily_repetition
+Tn	2011	4	20	24.0	daily_repetition
+Tn	2011	4	21	24.0	daily_repetition
+Tn	2011	4	22	24.0	daily_repetition

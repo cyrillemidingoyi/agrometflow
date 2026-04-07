@@ -79,7 +79,10 @@ class PowerDownloader(ClimateSource):
                 raise RuntimeError("No data fetched from POWER.")
 
             full_df = pd.concat(all_data, ignore_index=True)
+            full_df = full_df.rename(columns={"Date": "Date"})
             self.data = full_df
+            
+            
             # Sauvegarde
             Path(output_dir).mkdir(parents=True, exist_ok=True)
             filename = Path(output_dir) / f"power_{start}_{end}.csv"
@@ -110,19 +113,19 @@ class PowerDownloader(ClimateSource):
             raise ValueError("No data available. Run download() first.")
 
         df = self.data.copy()
-        df["date"] = pd.to_datetime(df["date"])
+        df["Date"] = pd.to_datetime(df["Date"])
 
         if start_date:
-            df = df[df["date"] >= pd.to_datetime(start_date)]
+            df = df[df["Date"] >= pd.to_datetime(start_date)]
         if end_date:
-            df = df[df["date"] <= pd.to_datetime(end_date)]
+            df = df[df["Date"] <= pd.to_datetime(end_date)]
 
         if variables:
-            cols = ["date", "lat", "lon"] + [v for v in variables if v in df.columns]
+            cols = ["Date", "lat", "lon"] + [v for v in variables if v in df.columns]
             df = df[cols]
 
         if as_long:
-            df = df.melt(id_vars=["date", "lat", "lon"], var_name="variable", value_name="value")
+            df = df.melt(id_vars=["Date", "lat", "lon"], var_name="variable", value_name="value")
 
         return df
 
@@ -132,7 +135,7 @@ class PowerDownloader(ClimateSource):
         for var, daily_values in records.items():
             series = pd.Series(daily_values).rename(var)
             df = pd.concat([df, series], axis=1)
-        df.index.name = "date"
+        df.index.name = "Date"
         df.reset_index(inplace=True)
         return df
     
@@ -142,7 +145,7 @@ class PowerDownloader(ClimateSource):
         for var, daily_values in records.items():
             series = pd.Series(daily_values).rename(var)
             df = pd.concat([df, series], axis=1)
-        df.index.name = "date"
+        df.index.name = "Date"
         df.reset_index(inplace=True)
         return df
 

@@ -1,0 +1,4 @@
+station	Var	Year	Month	Day	Value	Test
+NGM00061099	rr	2018	7	25	120.9	climatic_outliers
+NGM00061099	rr	2018	8	11	172.7	climatic_outliers
+NGM00061099	rr	2020	8	11	140.0	climatic_outliers

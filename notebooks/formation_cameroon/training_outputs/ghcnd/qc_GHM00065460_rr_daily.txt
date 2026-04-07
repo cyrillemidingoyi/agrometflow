@@ -1,0 +1,2 @@
+station	Var	Year	Month	Day	Value	Test
+GHM00065460	rr	2019	4	5	319.0	daily_out_of_range
