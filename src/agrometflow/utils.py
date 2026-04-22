@@ -17,6 +17,7 @@ def get_logger(name="agrometflow", log_file=None, verbose=False):
         # Console handler
         ch = logging.StreamHandler()
         ch.setFormatter(formatter)
+        ch.setLevel(logging.INFO)
         logger.addHandler(ch)
 
         # Optional file handler
@@ -24,6 +25,7 @@ def get_logger(name="agrometflow", log_file=None, verbose=False):
             Path(log_file).parent.mkdir(parents=True, exist_ok=True)
             fh = logging.FileHandler(log_file)
             fh.setFormatter(formatter)
+            fh.setLevel(logging.DEBUG if verbose else logging.INFO)
             logger.addHandler(fh)
     
     logger.propagate = False

@@ -297,6 +297,30 @@ metadata = {
                 
             }
         },
+        "ETP": {
+            "unit": "mm/day",
+            "description": {
+                "en": "Daily evapotranspiration"
+            },
+            "products": {
+                "mdmetv3": {
+                    "sources": {
+                        "lsasaf": {
+                            "name": "ET",
+                            "unit": "mm/day",
+                            "description": "Daily evapotranspiration from EUMETSAT LSA SAF DMETv3",
+                            "resolution": "0.05*0.05"
+                        },
+                        "lsasaf_http": {
+                            "name": "ET",
+                            "unit": "mm/day",
+                            "description": "Daily evapotranspiration from EUMETSAT LSA SAF DMETv3",
+                            "resolution": "0.05*0.05"
+                        }
+                    }
+                }
+            }
+        },
         "WS2M": {
             "unit": "m/s",
             "description": {
@@ -499,6 +523,11 @@ products = {
         "name": "IMERG V07 Late",
         "description": "IMERG V06 Late",
         "url": "https://pmm.nasa.gov/GPM/imerg"
+    },
+    "mdmetv3": {
+        "name": "LSA SAF DMETv3",
+        "description": "EUMETSAT LSA SAF daily evapotranspiration product",
+        "url": "https://datalsasaf.lsasvcs.ipma.pt/PRODUCTS/MSG/MDMETv3/NETCDF/"
     }
 }
 

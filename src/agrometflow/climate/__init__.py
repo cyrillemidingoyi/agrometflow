@@ -5,6 +5,7 @@ def __getattr__(name):
         "PowerDownloader": "agrometflow.climate.power",
         "GHCNDDownloader": "agrometflow.climate.ghcnd",
         "CDSDownloader": "agrometflow.climate.cds",
+        "LSASAFDownloader": "agrometflow.climate.lsasaf",
         "ChirpsDownloader": "agrometflow.climate.chirps",
         "TamsatDownloader": "agrometflow.climate.tamsat",
         "Arc2Downloader": "agrometflow.climate.arc2",
@@ -40,6 +41,8 @@ def get_climate_source(source_name, **kwargs):
     _factories = {
         "power": ("agrometflow.climate.power", "PowerDownloader"),
         "cds": ("agrometflow.climate.cds", "CDSDownloader"),
+        "lsasaf": ("agrometflow.climate.lsasaf", "LSASAFDownloader"),
+        "lsasaf_http": ("agrometflow.climate.lsasaf", "LSASAFDownloader"),
         "chirps": ("agrometflow.climate.chirps", "ChirpsDownloader"),
         "tamsat": ("agrometflow.climate.tamsat", "TamsatDownloader"),
         "arc2": ("agrometflow.climate.arc2", "Arc2Downloader"),
