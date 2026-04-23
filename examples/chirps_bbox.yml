@@ -1,0 +1,14 @@
+global:
+  project_name: "chirps_bbox"
+  verbose: true
+  log_file: "training_outputs/logs/chirps_bbox.log"
+
+climate:
+  source: "chirps"
+  product: "chirps"
+  start_date: "2021-01-01"
+  end_date: "2021-01-05"
+  variables: ["PR"]
+  output_dir: "training_outputs/chirps_bbox"
+  max_workers: 2
+  bbox: [8.0, 2.0, 17.0, 13.0]

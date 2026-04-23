@@ -1,0 +1,17 @@
+global:
+  project_name: "chirps_points"
+  verbose: true
+  log_file: "training_outputs/logs/chirps_points.log"
+
+climate:
+  source: "chirps"
+  product: "chirps"
+  start_date: "2021-01-01"
+  end_date: "2021-01-05"
+  variables: ["PR"]
+  output_dir: "training_outputs/chirps_points"
+  max_workers: 2
+  overwrite_points_cache: true
+  points:
+    - [11.52, 3.87]
+    - [13.40, 9.30]

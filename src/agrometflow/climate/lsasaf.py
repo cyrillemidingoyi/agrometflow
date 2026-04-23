@@ -94,7 +94,7 @@ class LSASAFDownloader(ClimateSource):
         if points:
             self.logger.info(f"Points: {points}")
 
-        points_csv = build_points_csv_path(output_dir, product, start, end, points)
+            points_csv = build_points_csv_path(output_dir, product, start, end, points)
         if points and points_csv.exists() and not kwargs.get("overwrite_points_cache", False):
             self.logger.info(f"Using cached points CSV: {points_csv}")
             self.data = pd.read_csv(points_csv)
