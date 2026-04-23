@@ -275,14 +275,21 @@ def collect_final_files(variables, dates, output_dir, product, bbox=None):
 
 def download_points_stream(requests_to_run, auth, timeout, points, start_date, end_date, logger, max_workers=4):
     frames_by_var = {}
-    progress_desc = "Downloading and extracting LSA SAF points"
+    progress_desc = "Downloading LSA SAF files and extracting points"
 
     if max_workers == 1:
-        iterator = (
-            _fetch_points_subset(request, auth, timeout, points, start_date, end_date, logger)
-            for request in requests_to_run
-        )
-        for result in tqdm(iterator, total=len(requests_to_run), desc=progress_desc):
+        for request in tqdm(requests_to_run, total=len(requests_to_run), desc=progress_desc):
+            download = _download_request_to_tempfile(request, auth, timeout, logger)
+            if download is None:
+                continue
+            result = _extract_points_subset_from_file(
+                download["request"],
+                download["path"],
+                points,
+                start_date,
+                end_date,
+                logger,
+            )
             if result is None:
                 continue
             frames_by_var.setdefault(result["target_var"], []).append(result["df"])
@@ -290,19 +297,26 @@ def download_points_stream(requests_to_run, auth, timeout, points, start_date, e
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             futures = {
                 executor.submit(
-                    _fetch_points_subset,
+                    _download_request_to_tempfile,
                     request,
                     auth,
                     timeout,
-                    points,
-                    start_date,
-                    end_date,
                     logger,
                 ): request
                 for request in requests_to_run
             }
             for future in tqdm(as_completed(futures), total=len(futures), desc=progress_desc):
-                result = future.result()
+                download = future.result()
+                if download is None:
+                    continue
+                result = _extract_points_subset_from_file(
+                    download["request"],
+                    download["path"],
+                    points,
+                    start_date,
+                    end_date,
+                    logger,
+                )
                 if result is None:
                     continue
                 frames_by_var.setdefault(result["target_var"], []).append(result["df"])
@@ -312,25 +326,38 @@ def download_points_stream(requests_to_run, auth, timeout, points, start_date, e
 
 def download_bbox_stream(requests_to_run, auth, timeout, bbox, logger, max_workers=4):
     datasets_by_group = {}
-    progress_desc = "Downloading and clipping LSA SAF bbox"
+    progress_desc = "Downloading LSA SAF files and clipping bbox"
 
     if max_workers == 1:
-        iterator = (
-            _fetch_bbox_subset(request, auth, timeout, bbox, logger)
-            for request in requests_to_run
-        )
-        for result in tqdm(iterator, total=len(requests_to_run), desc=progress_desc):
+        for request in tqdm(requests_to_run, total=len(requests_to_run), desc=progress_desc):
+            download = _download_request_to_tempfile(request, auth, timeout, logger)
+            if download is None:
+                continue
+            result = _extract_bbox_subset_from_file(
+                download["request"],
+                download["path"],
+                bbox,
+                logger,
+            )
             if result is None:
                 continue
             datasets_by_group.setdefault(result["group"], []).append(result["dataset"])
     else:
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             futures = {
-                executor.submit(_fetch_bbox_subset, request, auth, timeout, bbox, logger): request
+                executor.submit(_download_request_to_tempfile, request, auth, timeout, logger): request
                 for request in requests_to_run
             }
             for future in tqdm(as_completed(futures), total=len(futures), desc=progress_desc):
-                result = future.result()
+                download = future.result()
+                if download is None:
+                    continue
+                result = _extract_bbox_subset_from_file(
+                    download["request"],
+                    download["path"],
+                    bbox,
+                    logger,
+                )
                 if result is None:
                     continue
                 datasets_by_group.setdefault(result["group"], []).append(result["dataset"])
@@ -590,14 +617,32 @@ def _merge_frames_by_var(frames_by_var):
     return merged.sort_values(["time", "lon", "lat"]).reset_index(drop=True)
 
 
-def _fetch_points_subset(request, auth, timeout, points, start_date, end_date, logger):
-    group = request["group"]
-    source_var = group["source_var"]
-    target_var = group["target_var"]
-
+def _download_request_to_tempfile(request, auth, timeout, logger):
     local_path = _download_to_tempfile(request["url"], auth, timeout, logger)
     if local_path is None:
         return None
+    return {"request": request, "path": local_path}
+
+
+def _fetch_points_subset(request, auth, timeout, points, start_date, end_date, logger):
+    local_path = _download_to_tempfile(request["url"], auth, timeout, logger)
+    if local_path is None:
+        return None
+
+    return _extract_points_subset_from_file(
+        request,
+        local_path,
+        points,
+        start_date,
+        end_date,
+        logger,
+    )
+
+
+def _extract_points_subset_from_file(request, local_path, points, start_date, end_date, logger):
+    group = request["group"]
+    source_var = group["source_var"]
+    target_var = group["target_var"]
 
     try:
         file_date = _date_from_daily_file(request["path"])
@@ -629,12 +674,16 @@ def _fetch_points_subset(request, auth, timeout, points, start_date, end_date, l
 
 
 def _fetch_bbox_subset(request, auth, timeout, bbox, logger):
-    group = request["group"]
-    source_var = group["source_var"]
-
     local_path = _download_to_tempfile(request["url"], auth, timeout, logger)
     if local_path is None:
         return None
+
+    return _extract_bbox_subset_from_file(request, local_path, bbox, logger)
+
+
+def _extract_bbox_subset_from_file(request, local_path, bbox, logger):
+    group = request["group"]
+    source_var = group["source_var"]
 
     try:
         file_date = _date_from_daily_file(request["path"])
@@ -660,6 +709,7 @@ def _download_to_tempfile(url, auth, timeout, logger):
         with requests.get(url, auth=auth, stream=True, timeout=timeout) as response:
             if response.status_code == 404:
                 logger.warning(f"Missing file: {url}")
+                tmp_path.unlink(missing_ok=True)
                 return None
             response.raise_for_status()
             content_type = response.headers.get("content-type", "")

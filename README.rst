@@ -33,3 +33,16 @@ Install
 .. code-block:: bash
 
    pip install agrometflow
+
+Run Without Notebook
+--------------------
+
+For training sessions, participants can run downloads from a YAML file without
+writing Python:
+
+.. code-block:: bash
+
+   agrometflow-run examples/lsasaf_etp_points.yml --max-workers 2
+
+In Binder, keep ``--max-workers`` between ``1`` and ``2`` to avoid exhausting the
+session memory.

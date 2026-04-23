@@ -1,0 +1,17 @@
+global:
+  project_name: "lsasaf_etp_points"
+  verbose: true
+  log_file: "training_outputs/logs/lsasaf_etp_points.log"
+
+climate:
+  source: "lsasaf_http"
+  product: "mdmetv3"
+  start_date: "2021-01-01"
+  end_date: "2021-01-05"
+  variables: ["ETP"]
+  output_dir: "training_outputs/lsasaf_points"
+  max_workers: 2
+  overwrite_points_cache: true
+  points:
+    - [11.52, 3.87]
+    - [13.40, 9.30]

@@ -33,3 +33,5 @@ dependencies = [
 "Homepage" = "https://github.com/CropModelingPlatform/agrometflow"
 "Documentation" = "https://agrometflow.readthedocs.io/en/latest/"
 
+[project.scripts]
+agrometflow-run = "agrometflow.cli:main"

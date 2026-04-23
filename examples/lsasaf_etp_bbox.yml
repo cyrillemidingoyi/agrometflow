@@ -1,0 +1,14 @@
+global:
+  project_name: "lsasaf_etp_bbox"
+  verbose: true
+  log_file: "training_outputs/logs/lsasaf_etp_bbox.log"
+
+climate:
+  source: "lsasaf_http"
+  product: "mdmetv3"
+  start_date: "2021-01-01"
+  end_date: "2021-01-05"
+  variables: ["ETP"]
+  output_dir: "training_outputs/lsasaf_bbox"
+  max_workers: 2
+  bbox: [8.0, 2.0, 17.0, 13.0]
