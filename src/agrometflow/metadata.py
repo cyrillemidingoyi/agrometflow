@@ -260,6 +260,76 @@ metadata = {
                         }
                     }
                 },
+                "persiann_ccs": {
+                    "sources": {
+                        "chrs_ftp": {
+                            "name": "PR",
+                            "unit": "mm/day",
+                            "description": "Total daily precipitation (PERSIANN-CCS)",
+                            "resolution": "0.04*0.04"
+                        }
+                    }
+                },
+                "persiann_cdr": {
+                    "sources": {
+                        "chrs_ftp": {
+                            "name": "PR",
+                            "unit": "mm/day",
+                            "description": "Total daily precipitation (PERSIANN-CDR)",
+                            "resolution": "0.25*0.25"
+                        }
+                    }
+                },
+                "persiann_ccs_cdr_v2_b1": {
+                    "sources": {
+                        "chrs_ftp": {
+                            "name": "PR",
+                            "unit": "mm/day",
+                            "description": "Total daily precipitation (PERSIANN-CCS-CDR V2 B1)",
+                            "resolution": "0.04*0.04"
+                        }
+                    }
+                },
+                "persiann_ccs_cdr_v2_cpc": {
+                    "sources": {
+                        "chrs_ftp": {
+                            "name": "PR",
+                            "unit": "mm/day",
+                            "description": "Total daily precipitation (PERSIANN-CCS-CDR V2 CPC)",
+                            "resolution": "0.04*0.04"
+                        }
+                    }
+                },
+                "pdirnow": {
+                    "sources": {
+                        "chrs_ftp": {
+                            "name": "PR",
+                            "unit": "mm/day",
+                            "description": "Total daily precipitation (PDIR-Now)",
+                            "resolution": "0.04*0.04"
+                        }
+                    }
+                },
+                "persiann_v3": {
+                    "sources": {
+                        "chrs_ftp": {
+                            "name": "PR",
+                            "unit": "mm/day",
+                            "description": "Total daily precipitation (PERSIANN V3 / PUnet)",
+                            "resolution": "0.04*0.04"
+                        }
+                    }
+                },
+                "persiann_cdr_v3": {
+                    "sources": {
+                        "chrs_ftp": {
+                            "name": "PR",
+                            "unit": "mm/day",
+                            "description": "Total daily precipitation (PERSIANN-CDR V3 / PUnetCDR)",
+                            "resolution": "0.04*0.04"
+                        }
+                    }
+                },
                 "mswep": {
                     "sources": {
                         "gloh2o_drive": { 
@@ -485,6 +555,41 @@ products = {
         "description": "Precipitation Estimation from Remotely Sensed Information using Artificial Neural Networks",
         "url": "http://persiann.eng.uci.edu/"
     },
+    "persiann_ccs": {
+        "name": "PERSIANN-CC",
+        "description": "PERSIANN Climate Data",
+        "url": "http://persiann.eng.uci.edu/"
+    },
+    "persiann_cdr": {
+        "name": "PERSIANN-CDR",
+        "description": "PERSIANN Climate Data Record (long-term archive)",
+        "url": "http://persiann.eng.uci.edu/"
+    },
+     "persiann_ccs_cdr_v2_b1": {
+    "name": "PERSIANN-CCS-CDR V2 B1",
+    "description": "PERSIANN-CCS-CDR V2.0 B1 (long record, 1983-2000, lower performance)",
+    "url": "http://doi.org/10.5061/dryad.n8pk0p38q"
+    },
+    "persiann_ccs_cdr_v2_cpc": {
+        "name": "PERSIANN-CCS-CDR V2 CPC",
+        "description": "PERSIANN-CCS-CDR V2.0 CPC (better performance, 2000-present)",
+        "url": "http://doi.org/10.5061/dryad.n8pk0p38q"
+    },
+    "pdirnow": {
+        "name": "PDIR-Now",
+        "description": "Precipitation Data Record from Now (high resolution, near real-time)",
+        "url": "http://persiann.eng.uci.edu/CHRSdata/PDIRNow"
+    },
+    "persiann_v3": {
+        "name": "PERSIANN V3 (PUnet)",
+        "description": "PERSIANN Version 3 / PUnet (deep learning model)",
+        "url": "http://persiann.eng.uci.edu/CHRSdata/PUnet"
+    },
+    "persiann_cdr_v3": {
+        "name": "PERSIANN-CDR V3 (PUnetCDR)",
+        "description": "PERSIANN Climate Data Record Version 3 / PUnetCDR",
+        "url": "http://persiann.eng.uci.edu/CHRSdata/PUnetCDR"
+    },
     "mswep": {
         "name": "MSWEP",
         "description": "Multi-Source Weighted-Ensemble Precipitation",
@@ -510,16 +615,11 @@ products = {
         "description": "Integrated Multi-satellite Retrievals for GPM",
         "url": "https://pmm.nasa.gov/GPM/imerg"
     },
-    "persiann_ccs": {
-        "name": "PERSIANN-CC",
-        "description": "PERSIANN Climate Data",
-        "url": "http://persiann.eng.uci.edu/"
-    },
-    "persiann_ccscdr": {
-        "name": "PERSIANN-CCS CDR",
-        "description": "PERSIANN Climate Data V1",
-        "url": "http://persiann.eng.uci.edu/"
-    },
+    #"persiann_ccscdr": {
+    #   "name": "PERSIANN-CCS CDR",
+    #   "description": "PERSIANN Climate Data V1",
+    #   "url": "http://persiann.eng.uci.edu/"
+    #},
     "imergF": {
         "name": "IMERG V07 Final",
         "description": "IMERG V06 Early",

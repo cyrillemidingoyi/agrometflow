@@ -46,10 +46,10 @@ def get_climate_source(source_name, **kwargs):
         "chirps": ("agrometflow.climate.chirps", "ChirpsDownloader"),
         "tamsat": ("agrometflow.climate.tamsat", "TamsatDownloader"),
         "arc2": ("agrometflow.climate.arc2", "Arc2Downloader"),
-        "persiann": ("agrometflow.climate.persiann", "PersiannDownloader"),
         "cmorphv1": ("agrometflow.climate.cmorphv1", "Cmorphv1Downloader"),
         "rfe2": ("agrometflow.climate.rfe2", "Rfe2Downloader"),
         "ghcnd": ("agrometflow.climate.ghcnd", "GHCNDDownloader"),
+        "chrs_ftp": ("agrometflow.climate.persiann", "PersiannDownloader"),
     }
 
     if source_name not in _factories:
@@ -58,4 +58,9 @@ def get_climate_source(source_name, **kwargs):
     import importlib
     mod_path, cls_name = _factories[source_name]
     mod = importlib.import_module(mod_path)
-    return getattr(mod, cls_name)(**kwargs)
+    cls = getattr(mod, cls_name)
+    # Si la classe est PersiannDownloader, on transmet le product
+    # if cls_name == "PersiannDownloader":
+    # kwargs["product"] = source_name
+    
+    return cls(**kwargs)
