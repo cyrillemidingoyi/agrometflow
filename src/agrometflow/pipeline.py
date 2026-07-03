@@ -65,7 +65,7 @@ def run_pipeline(config):
             logger.error("Pipeline aborted due to invalid variables.")
             return {}
     
-        downloader = get_climate_source(source, log_file=log_file, verbose=verbose)
+        downloader = get_climate_source(source, product=product,log_file=log_file, verbose=verbose)
         logger.info(f"climate_cfg: {climate_cfg}")
         downloader.download(**climate_cfg)
         if "points" in climate_cfg: results["climate"] = downloader.extract()

@@ -1,0 +1,12 @@
+global:
+  project_name: "test_persiann_integration"
+  verbose: True
+  log_file: "pipeline_persiann.log"
+
+climate:
+  source: "chrs_ftp"
+  product: "persiann_ccs"
+  variables: ["PR"]
+  start_date: "2020-01-01"
+  end_date: "2020-01-02"
+  output_dir: "data/persiann_test"
