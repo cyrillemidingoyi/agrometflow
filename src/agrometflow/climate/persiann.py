@@ -36,6 +36,8 @@ class PersiannDownloader:
             "description": "PERSIANN standard (daily precipitation)",
             "filename_format": "prefix_dYYDDD",
             "endian":">f4",  # big-endian
+            "available_from": "2000-03-01",
+            "available_to": "present",
         },
         "persiann_ccs": {
             "base_url": "http://persiann.eng.uci.edu/CHRSdata/PERSIANN-CCS/daily",
@@ -50,6 +52,8 @@ class PersiannDownloader:
             "description": "PERSIANN-CCS (high resolution, daily precipitation)",
             "filename_format": "prefixYYDDD",
             "endian": ">f4",  # big-endian
+            "available_from": "2000-01-01",
+            "available_to": "present",
         },
         "persiann_cdr": {
             "base_url": "http://persiann.eng.uci.edu/CHRSdata/PERSIANN-CDR/daily",
@@ -64,6 +68,8 @@ class PersiannDownloader:
             "description": "PERSIANN-CDR (climate data record)",
             "filename_format": "prefix_dYYDDD",
             "endian": ">f4",  # big-endian
+            "available_from": "1983-01-01",
+            "available_to": "present",
         },
          "persiann_ccs_cdr_v2_b1": {
             "base_url": "https://persiann.eng.uci.edu/CHRSdata/PCCSCDR_B1/daily",
@@ -80,6 +86,8 @@ class PersiannDownloader:
             "filename_format": "prefix_XXYYMMDDhh",
             "endian": "<f4",  # little-endian (contrairement aux autres produits)
             "accumulation": "1d",  # journalier par défaut
+            "available_from": "1980-01-01",
+            "available_to": "2025-12-31",
         },
         "persiann_ccs_cdr_v2_cpc": {
             "base_url": "https://persiann.eng.uci.edu/CHRSdata/PCCSCDR_CPC/daily",
@@ -96,6 +104,9 @@ class PersiannDownloader:
             "filename_format": "prefix_XXYYMMDDhh",
             "endian": "<f4",
             "accumulation": "1d",
+            "available_from": "2000-03-01",
+            "available_to": "2025-12-31",
+            
         },
         "pdirnow": {
             "base_url": "https://persiann.eng.uci.edu/CHRSdata/PDIRNow/PDIRNowdaily",
@@ -111,6 +122,8 @@ class PersiannDownloader:
             "filename_format": "prefixXXYYMMDDhh",
             "endian": "<f4",  # little-endian (V11 et après)
             "accumulation": "1d",  # journalier par défaut
+            "available_from": "2000-03-01",
+            "available_to": "present",
             "special_cases": {
                 "1h": {
                     "dtype": "int16",
@@ -132,6 +145,8 @@ class PersiannDownloader:
             "filename_format": "prefixXXYYMMDDhh",
             "endian": "<f4",
             "accumulation": "1d",
+            "available_from": "2000-03-01",
+            "available_to": "present",
             "special_cases": {
                 "1h": {
                     "dtype": "int16",
@@ -153,6 +168,8 @@ class PersiannDownloader:
             "filename_format": "prefixXXYYMMDDhh",
             "endian": "<f4",
             "accumulation": "1d",  # journalier par défaut
+            "available_from": "1980-01-01",
+            "available_to": "present",
         }
     }
       
@@ -396,9 +413,29 @@ class PersiannDownloader:
             name="precip"
         )
         da = da.expand_dims(time=[np.datetime64(date)])
+
+        # --- CONVERSION DES LONGITUDES (0-360° → -180-180°) ---
         
         da = da.assign_coords(lon=(((da.lon + 180) % 360) - 180))
         da = da.sortby("lon")
+
+        # --- TRI DES LATITUDES (pour garantir l'ordre croissant) ---
+        da = da.sortby("lat")
+
+        # --- DÉCOUPAGE SPATIAL (bbox) ---
+        if hasattr(self, 'bbox') and self.bbox is not None:
+            south, north, west, east = self.bbox
+        
+            # 🔍 LOG POUR DIAGNOSTIC
+            self.logger.info(f"🔍 Bbox reçu : {self.bbox}")
+            self.logger.info(f"🔍 Latitudes disponibles : {da.lat.values[:5]} ... {da.lat.values[-5:]}")
+            self.logger.info(f"🔍 Longitudes disponibles : {da.lon.values[:5]} ... {da.lon.values[-5:]}")
+        
+            # Vérifier que les coordonnées sont dans les limites
+            da = da.sel(lat=slice(south, north), lon=slice(west, east))
+        
+            self.logger.info(f"📦 Découpage spatial appliqué : {south}°S → {north}°N, {west}°W → {east}°E")
+            self.logger.info(f"📦 Dimensions après découpage : {da.dims}")
         
         return da
 
@@ -408,8 +445,12 @@ class PersiannDownloader:
         Utilise des chunks pour éviter de tout charger en mémoire.
         """
         for year, file_date_pairs in bin_files_by_year.items():
-            # Inclure le nom du produit dans le fichier NetCDF
-            output_nc = self.output_dir / f"persiann_{self.product}_{year}.nc"
+            # Construire le nom du fichier avec le bbox si présent
+            bbox_str = ""
+            if hasattr(self, 'bbox') and self.bbox is not None:
+                bbox_str = f"_bbox_{self.bbox[0]}_{self.bbox[1]}_{self.bbox[2]}_{self.bbox[3]}"
+            
+            output_nc = self.output_dir / f"persiann_{self.product}_{year}{bbox_str}.nc"
             
             if output_nc.exists():
                 self.logger.info(f"⏩ Skipping {year}, NetCDF already exists.")
@@ -427,29 +468,70 @@ class PersiannDownloader:
                 combined = xr.concat(arrays, dim="time")
                 
                 # 🔑 AJOUT : Définir des chunks pour l'écriture
-                # Cela évite de tout charger en mémoire
-                # On découpe en blocs de 500x500 pour la latitude/longitude
-                # et 1 pour le temps (pour traiter jour par jour)
                 combined = combined.chunk({"time": 1, "lat": 500, "lon": 500})
                 
-                # Ajouter des métadonnées pour garder la traçabilité
+                # Ajouter des métadonnées
                 combined.attrs["product"] = self.product
                 combined.attrs["source"] = "PERSIANN"
                 combined.attrs["resolution"] = self.config.get("resolution", "unknown")
                 combined.attrs["description"] = self.config.get("description", "")
                 combined.attrs["accumulation"] = self.accumulation
+                if hasattr(self, 'bbox') and self.bbox is not None:
+                    combined.attrs["bbox"] = str(self.bbox)
                 
                 combined.to_netcdf(output_nc)
                 self.logger.info(f"💾 Saved NetCDF: {output_nc}")
 
-    def download(self, start_date, end_date, output_dir=None, **kwargs):
+    def download(self, start_date, end_date, output_dir=None, bbox=None, **kwargs):
         # Si output_dir est passé, on le prend en compte
         if output_dir is not None:
             self.output_dir = Path(output_dir)
             self.raw_dir = self.output_dir / "bin"
             self.raw_dir.mkdir(parents=True, exist_ok=True)
+        
+        # --- VÉRIFICATION DE LA PÉRIODE DE DISPONIBILITÉ ---
         start = datetime.strptime(start_date, "%Y-%m-%d") if isinstance(start_date, str) else start_date
         end = datetime.strptime(end_date, "%Y-%m-%d") if isinstance(end_date, str) else end_date
+
+        available_from = self.config.get("available_from")
+        available_to = self.config.get("available_to")
+
+        if available_from:
+            from_date = datetime.strptime(available_from, "%Y-%m-%d")
+            if start < from_date:
+                raise ValueError(
+                    f"❌ Le produit '{self.product}' n'est pas disponible avant le {available_from}. "
+                    f"Vous avez demandé à partir du {start_date}."
+                )
+
+        if available_to and available_to != "present":
+            to_date = datetime.strptime(available_to, "%Y-%m-%d")
+            if end > to_date:
+                raise ValueError(
+                    f"❌ Le produit '{self.product}' n'est pas disponible après le {available_to}. "
+                    f"Vous avez demandé jusqu'au {end_date}."
+                )
+
+        # --- CONVERSION DU BBOX (2 points → 4 points) ---
+        if bbox is not None:
+            # Si bbox a 2 points, le convertir en 4 points
+            if len(bbox) == 2:
+                lat_min, lon_min, lat_max, lon_max = bbox
+                bbox = [lat_min, lat_max, lon_min, lon_max]
+                self.logger.info(f"🔄 Bbox converti (2→4 points) : {bbox}")
+            elif len(bbox) == 4:
+                self.logger.info(f"📦 Bbox (4 points) : {bbox}")
+            else:
+                raise ValueError(f"Le bbox doit avoir 2 ou 4 points. Reçu : {len(bbox)} points.")
+
+        # --- STOCKAGE DU BBOX POUR LE DÉCOUPAGE SPATIAL ---
+        self.bbox = bbox
+        if bbox is not None:
+            self.logger.info(f"📦 Découpage spatial appliqué : {bbox}")
+        else:
+            self.logger.info("🌍 Aucun découpage spatial : données globales")
+
+        # --- TÉLÉCHARGEMENT ---
         dates = list(self._daterange(start, end))
 
         self.logger.info(f"🚀 Downloading PERSIANN '{self.product}' data from {start.date()} to {end.date()} using {self.max_workers} workers.")
@@ -573,3 +655,47 @@ class PersiannDownloader:
             ds = ds.stack(point=("lat", "lon")).reset_index("point")
         
         return ds
+    def to_csv(self, output_csv=None, variables=None):
+        """
+        Convertit les données NetCDF en CSV téléchargeable.
+
+        Parameters
+        ----------
+        output_csv : str, optional
+            Chemin du fichier CSV de sortie.
+        variables : list, optional
+            Liste des variables à exporter (par défaut : ['precip']).
+
+        Returns
+        -------
+        pandas.DataFrame
+            DataFrame contenant les données.
+        """
+        import pandas as pd
+        
+        # Rechercher les fichiers NetCDF
+        nc_files = list(self.output_dir.glob(f"persiann_{self.product}_*.nc"))
+        if not nc_files:
+            self.logger.error("❌ Aucun fichier NetCDF trouvé.")
+            return None
+        
+        # Charger le premier fichier (ou tous)
+        ds = xr.open_dataset(nc_files[0])
+        
+        # Sélectionner les variables
+        if variables is None:
+            variables = ['precip']
+        
+        # Convertir en DataFrame
+        df = ds[variables].to_dataframe().reset_index()
+        
+        # Sauvegarder en CSV
+        if output_csv is None:
+            output_csv = self.output_dir / f"persiann_{self.product}_data.csv"
+        else:
+            output_csv = Path(output_csv)
+        
+        df.to_csv(output_csv, index=False)
+        self.logger.info(f"💾 CSV sauvegardé : {output_csv}")
+        
+        return df
