@@ -50,6 +50,7 @@ def get_climate_source(source_name, **kwargs):
         "rfe2": ("agrometflow.climate.rfe2", "Rfe2Downloader"),
         "ghcnd": ("agrometflow.climate.ghcnd", "GHCNDDownloader"),
         "chrs_ftp": ("agrometflow.climate.persiann", "PersiannDownloader"),
+        "mswep": ("agrometflow.climate.mswep", "MswepDownloader"),
     }
 
     if source_name not in _factories:

@@ -67,6 +67,16 @@ class ChirpsDownloader(ClimateSource):
         end = pd.to_datetime(end_date)
         years = list(range(start.year, end.year + 1))
 
+        # ✅ VÉRIFICATION DES DATES DE DISPONIBILITÉ
+        AVAILABLE_FROM = "1981-01-01"
+        AVAILABLE_TO = "present"
+
+        if start < pd.to_datetime(AVAILABLE_FROM):
+            raise ValueError(
+                f"❌ CHIRPS n'est pas disponible avant le {AVAILABLE_FROM}. "
+                f"Vous avez demandé à partir du {start_date}."
+            )
+
         self.logger.info(f"Downloading CHIRPS precipitation for {len(years)} year(s)")
         self.logger.info(f"BBOX: {bbox}")
         self.logger.info(f"Max workers: {max_workers} (notebook mode: {is_notebook})")
