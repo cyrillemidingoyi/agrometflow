@@ -416,6 +416,30 @@ metadata = {
                 }
             }
         },
+        "ETo": {
+            "unit": "mm/day",
+            "description": {
+                "en": "Reference evapotranspiration"
+            },
+            "products": {
+                "metref": {
+                    "sources": {
+                        "lsasaf": {
+                            "name": "ETo",
+                            "unit": "mm/day",
+                            "description": "Reference evapotranspiration from EUMETSAT LSA SAF METREF",
+                            "resolution": "0.05*0.05"
+                        },
+                        "lsasaf_http": {
+                            "name": "ETo",
+                            "unit": "mm/day",
+                            "description": "Reference evapotranspiration from EUMETSAT LSA SAF METREF",
+                            "resolution": "0.05*0.05"
+                        }
+                    }
+                }
+            }
+        },
         "WS2M": {
             "unit": "m/s",
             "description": {

@@ -2,7 +2,8 @@
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 import tempfile
-
+import shutil
+import numpy as np
 import pandas as pd
 import requests
 import xarray as xr
@@ -85,12 +86,20 @@ class ChirpsDownloader(ClimateSource):
 
         if points:
             points_csv = build_points_csv_path(output_dir, start, end, points)
+
             if points_csv.exists() and not kwargs.get("overwrite_points_cache", False):
                 self.logger.info(f"Using cached points CSV: {points_csv}")
                 self.data = pd.read_csv(points_csv)
-                return
+                return self.data
 
-            requests_to_run = build_requests(years, output_dir, variables, bbox=None)
+
+            requests_to_run = build_requests(
+                years,
+                output_dir,
+                variables,
+                bbox=None
+            )
+
             self.data = download_points_stream(
                 requests_to_run=requests_to_run,
                 timeout=timeout,
@@ -100,11 +109,25 @@ class ChirpsDownloader(ClimateSource):
                 logger=self.logger,
                 max_workers=max_workers,
             )
+
+
             if self.data is not None and not self.data.empty:
+
                 points_csv.parent.mkdir(parents=True, exist_ok=True)
-                self.data.to_csv(points_csv, index=False)
-                self.logger.info(f"Saved points CSV: {points_csv}")
-            return
+
+                self.data.to_csv(
+                    points_csv,
+                    index=False
+                )
+
+                self.logger.info(
+                    f"Saved points CSV: {points_csv}"
+                )
+
+                return self.data
+
+
+            return pd.DataFrame()
 
         requests_to_run = build_requests(years, output_dir, variables, bbox=bbox)
         if bbox:
@@ -166,15 +189,33 @@ class ChirpsDownloader(ClimateSource):
 
 
 def build_requests(years, output_dir, variables, bbox=None):
+
     requests_to_run = []
+
+    base_url = (
+        "https://data.chc.ucsb.edu/"
+        "products/CHIRPS-2.0/"
+        "global_daily/netcdf/p05"
+    )
+
     for source_var, target_var in variables:
+
         var_dir = Path(output_dir) / target_var
         var_dir.mkdir(parents=True, exist_ok=True)
 
         for year in years:
+
             filename = f"chirps-v2.0.{year}.days_p05.nc"
-            url = f"{REMOTE_URL}/global_daily/netcdf/p05/{filename}"
-            final_nc = build_yearly_nc_path(output_dir, target_var, year, bbox=bbox)
+
+            url = f"{base_url}/{filename}"
+
+            final_nc = build_yearly_nc_path(
+                output_dir,
+                target_var,
+                year,
+                bbox=bbox
+            )
+
             requests_to_run.append(
                 {
                     "url": url,
@@ -322,12 +363,28 @@ def _download_request_to_tempfile(request, timeout, logger):
 
 
 def _download_to_tempfile(url, filename, timeout, logger):
+    """
+    Télécharge un fichier CHIRPS avec cache permanent.
+    La première fois : téléchargement complet )
+    Les fois suivantes : utilisation du cache
+    """
+    # ✅ Cache permanent
+    cache_dir = Path("data/chirps_cache")
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    cached_path = cache_dir / filename
+    
+    # Si le fichier est déjà en cache, l'utiliser
+    if cached_path.exists():
+        size_mb = cached_path.stat().st_size / 1024 / 1024
+        logger.info(f"✅ Using cached file ({size_mb:.1f} MB)")
+        return cached_path
+    
     tmp = tempfile.NamedTemporaryFile(prefix="chirps_", suffix=".nc", delete=False)
     tmp_path = Path(tmp.name)
     tmp.close()
 
     try:
-        logger.debug(f"Downloading {url}")
+        logger.info(f"⬇ Downloading {filename} (1.3 GB, may take several minutes)")
         with requests.get(url, stream=True, timeout=timeout) as response:
             response.raise_for_status()
             _raise_if_html(response)
@@ -335,40 +392,76 @@ def _download_to_tempfile(url, filename, timeout, logger):
                 for chunk in response.iter_content(chunk_size=1024 * 1024):
                     if chunk:
                         f.write(chunk)
+        
+        # ✅ Copier vers le cache
+        shutil.copy2(tmp_path, cached_path)
+        logger.info(f"💾 Cached: {cached_path}")
         return tmp_path
     except Exception as e:
         logger.warning(f"Failed for {filename}: {e}")
         tmp_path.unlink(missing_ok=True)
         return None
 
+def _extract_points_subset_from_file(
+    request,
+    local_path,
+    points,
+    start_date=None,
+    end_date=None,
+    logger=None
+):
+    records = []
+    source_var = request["group"]["source_var"]
+    target_var = request["group"]["target_var"]
 
-def _extract_points_subset_from_file(request, local_path, points, start_date, end_date, logger):
-    group = request["group"]
-    source_var = group["source_var"]
-    target_var = group["target_var"]
+    with xr.open_dataset(local_path, chunks={"time": 30}) as ds:
+        # Renommer les coordonnées
+        if "latitude" in ds.dims:
+            ds = ds.rename({"latitude": "lat", "longitude": "lon"})
+        
+        # Filtre temporel
+        if start_date and end_date:
+            ds = ds.sel(time=slice(start_date, end_date))
 
-    try:
-        with xr.open_dataset(local_path) as ds:
-            ds = _prepare_dataset(ds, source_var=source_var, bbox=None)
-            ds = _subset_time(ds, start_date, end_date)
-            ds_pts = extract_points_from_tuples(ds, points)
-            df = dataset_points_to_dataframe(ds_pts)
+        for point in points:
+            if isinstance(point, dict):
+                lon = point["lon"]
+                lat = point["lat"]
+            else:
+                lon, lat = point
 
-        if "time" in df.columns:
-            df["time"] = pd.to_datetime(df["time"])
-        base_cols = [c for c in ["time", "lon", "lat"] if c in df.columns]
-        keep_cols = base_cols + [c for c in [source_var] if c in df.columns]
-        df = df[keep_cols]
-        if source_var in df.columns and source_var != target_var:
-            df = df.rename(columns={source_var: target_var})
-        return {"target_var": target_var, "df": df}
-    except Exception as e:
-        logger.warning(f"Failed to extract points from {request['filename']}: {e}")
+            logger.info(f"📍 Extraction CHIRPS pour lon={lon}, lat={lat}")
+
+            try:
+                # ✅ Fenêtre spatiale de 0.10° autour du point
+                lat_slice = slice(lat - 0.10, lat + 0.10)
+                lon_slice = slice(lon - 0.10, lon + 0.10)
+                
+                subset = ds[source_var].sel(lat=lat_slice, lon=lon_slice)
+                
+                # ✅ Moyenne spatiale (ignore les NaN)
+                mean_ts = subset.mean(dim=["lat", "lon"], skipna=True)
+                
+                # ✅ Convertir en DataFrame
+                df = mean_ts.to_dataframe(name=target_var).reset_index()
+                
+                # ✅ Ajouter les coordonnées du point
+                df["lon"] = lon
+                df["lat"] = lat
+                
+                records.append(df)
+                
+            except Exception as e:
+                logger.warning(f"⚠️ Erreur pour le point ({lon}, {lat}): {e}")
+                continue
+
+    if not records:
         return None
-    finally:
-        Path(local_path).unlink(missing_ok=True)
 
-
+    return {
+        "target_var": target_var,
+        "df": pd.concat(records, ignore_index=True)
+    }
 def _write_bbox_subset_from_file(request, local_path, bbox, start_date, end_date, logger):
     group = request["group"]
     final_nc = Path(group["final_nc"])
@@ -400,12 +493,25 @@ def _write_bbox_subset_from_file(request, local_path, bbox, start_date, end_date
     finally:
         Path(local_path).unlink(missing_ok=True)
 
-
 def _prepare_dataset(ds, source_var, bbox=None):
+
     resolved = _resolve_data_var(ds, source_var)
+
+    # garder uniquement la variable utile
     ds = ds[[resolved]]
+
     if resolved != source_var:
         ds = ds.rename({resolved: source_var})
+
+
+    # Normalisation des noms de coordonnées
+    rename_coords = {}
+
+    if "latitude" in ds.coords and "lat" not in ds.coords:
+        ds = ds.rename({"latitude": "lat"})
+    if "longitude" in ds.coords and "lon" not in ds.coords:
+        ds = ds.rename({"longitude": "lon"})
+
     return _subset_bbox(ds, bbox)
 
 
@@ -414,8 +520,10 @@ def _subset_bbox(ds, bbox):
         return ds
 
     lon_min, lat_min, lon_max, lat_max = bbox
-    lon_name = _find_coord_name(ds, ("lon", "longitude"))
-    lat_name = _find_coord_name(ds, ("lat", "latitude"))
+    
+    # ✅ Utiliser les noms de coordonnées corrects
+    lon_name = _find_coord_name(ds, ("lon", "longitude", "x"))
+    lat_name = _find_coord_name(ds, ("lat", "latitude", "y"))
 
     if lon_name:
         lon_values = ds[lon_name]

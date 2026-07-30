@@ -184,7 +184,7 @@ class MswepDownloader:
                 combined.to_netcdf(outfile, engine='netcdf4', format='NETCDF4')
                 self.logger.info(f"💾 Saved yearly file: {outfile}")
 
-    def download(self, start_date, end_date, output_dir=None, bbox=None, dataset_type=None, **kwargs):
+    def download(self, start_date, end_date, output_dir=None, bbox=None, dataset_type=None, points=None, **kwargs):
         # Stocker le bbox
         self.bbox = bbox
         # 1. Déterminer le type de données
@@ -220,6 +220,20 @@ class MswepDownloader:
                     files_by_year.setdefault(date.year, []).append((f, date))
 
         self._merge_yearly(files_by_year)
+
+        # Si des points sont demandés → les extraire en CSV
+        if points is not None:
+            self.logger.info("📊 Extraction des points en CSV...")
+            
+            # Chercher le fichier NetCDF qui vient d'être créé
+            nc_files = list(self.output_dir.glob("mswep_*.nc"))
+            if nc_files:
+                # Charger le NetCDF et extraire les points
+                ds = xr.open_dataset(nc_files[0])
+                return self.to_csv(points=points)
+            else:
+                self.logger.error("❌ NetCDF non trouvé")
+                return None
 
     def to_csv(self, output_csv=None, points=None):
         """

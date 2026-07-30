@@ -68,7 +68,7 @@ class PersiannDownloader:
             "resolution": "0.25°",
             "description": "PERSIANN-CDR (climate data record)",
             "filename_format": "prefix_dYYDDD",
-            "endian": ">f4",  # big-endian
+            "endian": "<f4",
             "available_from": "1983-01-01",
             "available_to": "present",
         },
@@ -495,7 +495,7 @@ class PersiannDownloader:
                 combined.to_netcdf(output_nc)
                 self.logger.info(f"💾 Saved NetCDF: {output_nc}")
 
-    def download(self, start_date, end_date, output_dir=None, bbox=None, **kwargs):
+    def download(self, start_date, end_date, output_dir=None, bbox=None, points=None, **kwargs):
         # Si output_dir est passé, on le prend en compte
         if output_dir is not None:
             self.output_dir = Path(output_dir)
@@ -569,6 +569,17 @@ class PersiannDownloader:
                         self.logger.warning(f"Failed to parse date from {bin_path.name}: {e}")
 
         self.convert_downloaded_to_netcdf(bin_files_by_year)
+
+        # Si des points sont demandés → CSV direct
+        if points is not None:
+            self.logger.info("📊 Extraction des points en CSV...")
+            nc_files = list(self.output_dir.glob(f"persiann_{self.product}_*.nc"))
+            if nc_files:
+                ds = xr.open_dataset(nc_files[0])
+                return self.to_csv(points=points)
+            else:
+                self.logger.error("❌ NetCDF non trouvé")
+                return None
 
     def _parse_date_from_filename(self, fname):
         """
@@ -684,6 +695,23 @@ class PersiannDownloader:
             return None
         
         ds = xr.open_dataset(nc_files[0])
+
+        # Trouver et renommer la variable de précipitation
+        var_name = None
+        for possible in ['precip', 'precipitation', 'PR', 'rainfall', 'rfe']:
+            if possible in ds.data_vars:
+                var_name = possible
+                break
+        
+        if var_name is None:
+            # Si aucune variable standard n'est trouvée, prendre la première
+            var_name = list(ds.data_vars)[0]
+            self.logger.warning(f"⚠️ Variable inconnue : {var_name}")
+        
+        # Renommer si nécessaire
+        if var_name != 'PR':
+            ds = ds.rename({var_name: 'PR'})
+            self.logger.info(f"📝 Variable renommée : {var_name} → PR")
         
         records = []
         for point in points:
@@ -693,7 +721,7 @@ class PersiannDownloader:
                 self.logger.warning("⚠️ Point ignoré : lat/lon manquant")
                 continue
             
-            da = ds.precip.sel(lat=lat, lon=lon, method='nearest')
+            da = ds.PR.sel(lat=lat, lon=lon, method='nearest')
             df_point = da.to_dataframe().reset_index()
             df_point["point"] = f"({lat}, {lon})"
             records.append(df_point)

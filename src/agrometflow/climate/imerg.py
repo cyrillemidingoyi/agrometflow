@@ -36,14 +36,25 @@ class ImergDownloader:
         "imergF": {
             "base_url": "https://gpm1.gesdisc.eosdis.nasa.gov/data/GPM_L3/GPM_3IMERGDF.07",
             "description": "IMERG Final (research quality, ~2-3 months latency)",
-            "filename_pattern": "3B-DAY-F.MS.MRG.3IMERG.{yyyymmdd}-S000000-E235959.V07B.nc4",
+            "filename_pattern": "3B-DAY.MS.MRG.3IMERG.{yyyymmdd}-S000000-E235959.V07B.nc4",
             "available_from": "1998-01-01",
             "available_to": "present"
         }
     }
      
-    def __init__( self, product="imergL", output_dir="data/imerg", log_file=None, verbose=False, max_workers=4, token=None):
+    def __init__(self, product="imergL", output_dir="data/imerg", log_file=None, verbose=False, max_workers=4, token=None):
+        """
+        Initialise le téléchargeur IMERG.
 
+        Parameters
+        ----------
+        product : str
+            Produit IMERG ('imergL', 'imergE', 'imergF')
+        output_dir : str
+            Dossier de sortie
+        token : str, optional
+            Token NASA Earthdata. Si None, cherche NASA_EARTHDATA_TOKEN
+        """
         if product not in self.PRODUCTS:
             raise ValueError(f"Produit '{product}' non supporté. Choisir parmi : {list(self.PRODUCTS.keys())}")
 
@@ -54,12 +65,14 @@ class ImergDownloader:
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.logger = get_logger("agrometflow.imerg", log_file=log_file, verbose=verbose)
         self.max_workers = max_workers
+        
+        # ✅ Authentification : uniquement token
         self.token = token or os.getenv("NASA_EARTHDATA_TOKEN")
 
-        if not self.token:
-            self.logger.warning("⚠️ Aucun token NASA Earthdata trouvé. Les téléchargements peuvent échouer.")
+        if self.token:
+            self.logger.info("🔐 Authentification NASA configurée (token)")
         else:
-            self.logger.info(f"🔐 Authentification NASA configurée")
+            self.logger.warning("⚠️ Aucun token NASA trouvé. Définissez NASA_EARTHDATA_TOKEN")
 
         self.logger.info(f"🔧 Initialisation du produit IMERG : {product}")
         self.logger.info(f"   Description : {self.config['description']}")
@@ -90,20 +103,26 @@ class ImergDownloader:
             return local_path, date
 
         try:
-            headers = {"Authorization": f"Bearer {self.token}"} if self.token else {}
-            with requests.get(url, headers=headers, stream=True, timeout=60) as r:
-                if r.status_code == 401:
-                    self.logger.error(
-                        "❌ Authentification NASA requise.\n"
-                        "   Pour obtenir un token : https://urs.earthdata.nasa.gov/\n"
-                        "   Puis définissez la variable d'environnement NASA_EARTHDATA_TOKEN"
-                    )
-                    return None, date
-                r.raise_for_status()
-                with open(local_path, "wb") as f:
-                    for chunk in r.iter_content(chunk_size=8192):
-                        if chunk:
-                            f.write(chunk)
+            # ✅ Authentification : token
+            if self.token:
+                headers = {"Authorization": f"Bearer {self.token}"}
+                response = requests.get(url, headers=headers, stream=True, timeout=60)
+            else:
+                response = requests.get(url, stream=True, timeout=60)
+                
+            if response.status_code == 401:
+                self.logger.error(
+                    "❌ Token NASA requis.\n"
+                    "   Générez un token sur : https://urs.earthdata.nasa.gov/profile\n"
+                    "   Puis définissez la variable d'environnement NASA_EARTHDATA_TOKEN"
+                )
+                return None, date
+            response.raise_for_status()
+            
+            with open(local_path, "wb") as f:
+                for chunk in response.iter_content(chunk_size=8192):
+                    if chunk:
+                        f.write(chunk)
             self.logger.info(f"✅ Downloaded: {filename}")
             return local_path, date
         except requests.exceptions.HTTPError as e:
@@ -127,7 +146,16 @@ class ImergDownloader:
             for f, date in sorted(file_date_pairs, key=lambda x: x[1]):
                 try:
                     ds = xr.open_dataset(f)
-                    ds = ds.expand_dims(time=[np.datetime64(date)])
+
+                    # ✅ Gérer correctement la dimension 'time'
+                    if 'time' not in ds.dims:
+                        # Si pas de dimension time, l'ajouter
+                        ds = ds.expand_dims(time=[np.datetime64(date)])
+                    else:
+                        # Si la dimension time existe déjà, garder la date
+                        # Certains fichiers IMERG ont déjà la date dans le temps
+                        pass
+
                     arrays.append(ds)
                 except Exception as e:
                     self.logger.error(f"⚠️ Failed to read {f.name}: {e}")
@@ -180,7 +208,7 @@ class ImergDownloader:
                 combined.to_netcdf(outfile)
                 self.logger.info(f"💾 Saved yearly file: {outfile}")
 
-    def download(self, start_date, end_date, output_dir=None, bbox=None, **kwargs):
+    def download(self, start_date, end_date, output_dir=None, bbox=None, points=None, **kwargs):
         if output_dir is not None:
             self.output_dir = Path(output_dir)
             self.output_dir.mkdir(parents=True, exist_ok=True)
@@ -218,6 +246,20 @@ class ImergDownloader:
                     files_by_year.setdefault(date.year, []).append((f, date))
 
         self._merge_yearly(files_by_year)
+
+        # Si des points sont demandés → les extraire en CSV
+        if points is not None:
+            self.logger.info("📊 Extraction des points en CSV...")
+            
+            # Chercher le fichier NetCDF qui vient d'être créé
+            nc_files = list(self.output_dir.glob("imerg_*.nc"))
+            if nc_files:
+                # Charger le NetCDF et extraire les points
+                ds = xr.open_dataset(nc_files[0])
+                return self.to_csv(points=points)
+            else:
+                self.logger.error("❌ NetCDF non trouvé")
+                return None
 
     def to_csv(self, output_csv=None, points=None):
         if points is None:
