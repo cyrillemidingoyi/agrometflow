@@ -21,11 +21,16 @@ PRODUCTS = {
         "base_url": "https://datalsasaf.lsasvcs.ipma.pt/PRODUCTS/MSG/MDMETv3/NETCDF",
         "file_prefix": "NETCDF4_LSASAF_MSG_DMETv3_MSG-Disk_",
         "default_var": "ET",
+        "available_from": "2004-01-01",
+        "available_to": "present"
     },
     "metref": {
         "base_url": "https://datalsasaf.lsasvcs.ipma.pt/PRODUCTS/MSG/METREF/NETCDF",
         "file_prefix": "NETCDF4_LSASAF_MSG_METREF_MSG-Disk_",
-        "default_var": "ETo",
+        "default_var": "ET",
+        "target_var": "ETo",
+        "available_from": "2004-01-01",
+        "available_to": "present"
     },
 }
 
@@ -40,9 +45,10 @@ def _is_notebook_environment():
 
 
 class LSASAFDownloader(ClimateSource):
-    def __init__(self, log_file=None, verbose=False):
+    def __init__(self, product="mdmetv3", log_file=None, verbose=False):
         self.logger = get_logger(__name__, log_file=log_file, verbose=verbose)
         self.data = None
+        self.product = product
 
     def download(self, **kwargs):
         """

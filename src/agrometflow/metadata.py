@@ -360,17 +360,36 @@ metadata = {
                         }
                     }
                 },
-                "imerg": {
+                "imergL": {
                     "sources": {
-                        "nasa_gesdisc_http": { 
-                                "name": "IMERG_PRECTOT",
-                                "unit": "mm/day",
-                                "description": "Daily mean precipitation rate (combined microwave-IR) estimate",
-                                "resolution": "0.1*0.1"
+                        "nasa_gesdisc": {
+                            "name": "PR",
+                            "unit": "mm/day",
+                            "description": "IMERG Late (near real-time, ~12h latency)",
+                            "resolution": "0.1*0.1"
                         }
                     }
                 },
-                
+                "imergE": {
+                    "sources": {
+                        "nasa_gesdisc": {
+                            "name": "PR",
+                            "unit": "mm/day",
+                            "description": "IMERG Early (near real-time, ~4h latency)",
+                            "resolution": "0.1*0.1"
+                        }
+                    }
+                },
+                "imergF": {
+                    "sources": {
+                        "nasa_gesdisc": {
+                            "name": "PR",
+                            "unit": "mm/day",
+                            "description": "IMERG Final (research quality, ~2-3 months latency)",
+                            "resolution": "0.1*0.1"
+                        }
+                    }
+                }
             }
         },
         "ETP": {
@@ -391,6 +410,30 @@ metadata = {
                             "name": "ET",
                             "unit": "mm/day",
                             "description": "Daily evapotranspiration from EUMETSAT LSA SAF DMETv3",
+                            "resolution": "0.05*0.05"
+                        }
+                    }
+                }
+            }
+        },
+        "ETo": {
+            "unit": "mm/day",
+            "description": {
+                "en": "Reference evapotranspiration"
+            },
+            "products": {
+                "metref": {
+                    "sources": {
+                        "lsasaf": {
+                            "name": "ETo",
+                            "unit": "mm/day",
+                            "description": "Reference evapotranspiration from EUMETSAT LSA SAF METREF",
+                            "resolution": "0.05*0.05"
+                        },
+                        "lsasaf_http": {
+                            "name": "ETo",
+                            "unit": "mm/day",
+                            "description": "Reference evapotranspiration from EUMETSAT LSA SAF METREF",
                             "resolution": "0.05*0.05"
                         }
                     }
@@ -622,14 +665,20 @@ products = {
     #},
     "imergF": {
         "name": "IMERG V07 Final",
-        "description": "IMERG V06 Early",
+        "description": "IMERG V07 Final, - donnée de référence scientifique (~2-3 mois latence)",
         "url": "https://pmm.nasa.gov/GPM/imerg"
     },
     "imergL": {
         "name": "IMERG V07 Late",
-        "description": "IMERG V06 Late",
+        "description": "IMERG V07 Late,- quasi temps réel (~12h latence)",
         "url": "https://pmm.nasa.gov/GPM/imerg"
     },
+    "imergE": {
+        "name": "IMERG Early",
+        "description": "IMERG Early - quasi temps réel (~4h latence)",
+        "url": "https://pmm.nasa.gov/GPM/imerg"
+    },
+
     "mdmetv3": {
         "name": "LSA SAF DMETv3",
         "description": "EUMETSAT LSA SAF daily evapotranspiration product",

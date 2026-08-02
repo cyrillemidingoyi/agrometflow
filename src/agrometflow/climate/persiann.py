@@ -9,6 +9,7 @@
     - persiann_cdr_v3 : PERSIANN-CDR V3 / PUnetCDR (0.04°, 3000x9000)
     """
 import numpy as np
+import pandas as pd
 import xarray as xr
 import requests
 import gzip
@@ -67,7 +68,7 @@ class PersiannDownloader:
             "resolution": "0.25°",
             "description": "PERSIANN-CDR (climate data record)",
             "filename_format": "prefix_dYYDDD",
-            "endian": ">f4",  # big-endian
+            "endian": "<f4",
             "available_from": "1983-01-01",
             "available_to": "present",
         },
@@ -425,18 +426,30 @@ class PersiannDownloader:
         # --- DÉCOUPAGE SPATIAL (bbox) ---
         if hasattr(self, 'bbox') and self.bbox is not None:
             south, north, west, east = self.bbox
-        
+
             # 🔍 LOG POUR DIAGNOSTIC
             self.logger.info(f"🔍 Bbox reçu : {self.bbox}")
             self.logger.info(f"🔍 Latitudes disponibles : {da.lat.values[:5]} ... {da.lat.values[-5:]}")
             self.logger.info(f"🔍 Longitudes disponibles : {da.lon.values[:5]} ... {da.lon.values[-5:]}")
-        
-            # Vérifier que les coordonnées sont dans les limites
-            da = da.sel(lat=slice(south, north), lon=slice(west, east))
-        
+
+            # ✅ Détection automatique du sens des latitudes
+            if da.lat.values[0] > da.lat.values[-1]:
+                lat_slice = slice(north, south)
+            else:
+                lat_slice = slice(south, north)
+
+            da = da.sel(lat=lat_slice, lon=slice(west, east))
+
+            # ✅ VÉRIFICATION : s'assurer que le bbox a donné des résultats
+            if da.sizes.get('lat', 0) == 0 or da.sizes.get('lon', 0) == 0:
+                raise ValueError(
+                    f"❌ Le bbox {self.bbox} ne recoupe pas les données disponibles.\n"
+                    f"   Aucune latitude ou longitude trouvée dans la zone demandée."
+                )
+
             self.logger.info(f"📦 Découpage spatial appliqué : {south}°S → {north}°N, {west}°W → {east}°E")
             self.logger.info(f"📦 Dimensions après découpage : {da.dims}")
-        
+
         return da
 
     def convert_downloaded_to_netcdf(self, bin_files_by_year):
@@ -482,7 +495,7 @@ class PersiannDownloader:
                 combined.to_netcdf(output_nc)
                 self.logger.info(f"💾 Saved NetCDF: {output_nc}")
 
-    def download(self, start_date, end_date, output_dir=None, bbox=None, **kwargs):
+    def download(self, start_date, end_date, output_dir=None, bbox=None, points=None, **kwargs):
         # Si output_dir est passé, on le prend en compte
         if output_dir is not None:
             self.output_dir = Path(output_dir)
@@ -556,6 +569,17 @@ class PersiannDownloader:
                         self.logger.warning(f"Failed to parse date from {bin_path.name}: {e}")
 
         self.convert_downloaded_to_netcdf(bin_files_by_year)
+
+        # Si des points sont demandés → CSV direct
+        if points is not None:
+            self.logger.info("📊 Extraction des points en CSV...")
+            nc_files = list(self.output_dir.glob(f"persiann_{self.product}_*.nc"))
+            if nc_files:
+                ds = xr.open_dataset(nc_files[0])
+                return self.to_csv(points=points)
+            else:
+                self.logger.error("❌ NetCDF non trouvé")
+                return None
 
     def _parse_date_from_filename(self, fname):
         """
@@ -655,47 +679,64 @@ class PersiannDownloader:
             ds = ds.stack(point=("lat", "lon")).reset_index("point")
         
         return ds
-    def to_csv(self, output_csv=None, variables=None):
+    
+    def to_csv(self, output_csv=None, points=None):
         """
-        Convertit les données NetCDF en CSV téléchargeable.
-
-        Parameters
-        ----------
-        output_csv : str, optional
-            Chemin du fichier CSV de sortie.
-        variables : list, optional
-            Liste des variables à exporter (par défaut : ['precip']).
-
-        Returns
-        -------
-        pandas.DataFrame
-            DataFrame contenant les données.
+        Extrait les données en CSV pour des points spécifiques.
         """
-        import pandas as pd
+        if points is None:
+            self.logger.error("❌ Le CSV nécessite une liste de points (lat/lon).")
+            return None
         
-        # Rechercher les fichiers NetCDF
+        # Charger le fichier NetCDF
         nc_files = list(self.output_dir.glob(f"persiann_{self.product}_*.nc"))
         if not nc_files:
             self.logger.error("❌ Aucun fichier NetCDF trouvé.")
             return None
         
-        # Charger le premier fichier (ou tous)
         ds = xr.open_dataset(nc_files[0])
+
+        # Trouver et renommer la variable de précipitation
+        var_name = None
+        for possible in ['precip', 'precipitation', 'PR', 'rainfall', 'rfe']:
+            if possible in ds.data_vars:
+                var_name = possible
+                break
         
-        # Sélectionner les variables
-        if variables is None:
-            variables = ['precip']
+        if var_name is None:
+            # Si aucune variable standard n'est trouvée, prendre la première
+            var_name = list(ds.data_vars)[0]
+            self.logger.warning(f"⚠️ Variable inconnue : {var_name}")
         
-        # Convertir en DataFrame
-        df = ds[variables].to_dataframe().reset_index()
+        # Renommer si nécessaire
+        if var_name != 'PR':
+            ds = ds.rename({var_name: 'PR'})
+            self.logger.info(f"📝 Variable renommée : {var_name} → PR")
         
-        # Sauvegarder en CSV
+        records = []
+        for point in points:
+            lat = point.get("lat")
+            lon = point.get("lon")
+            if lat is None or lon is None:
+                self.logger.warning("⚠️ Point ignoré : lat/lon manquant")
+                continue
+            
+            da = ds.PR.sel(lat=lat, lon=lon, method='nearest')
+            df_point = da.to_dataframe().reset_index()
+            df_point["point"] = f"({lat}, {lon})"
+            records.append(df_point)
+        
+        if not records:
+            self.logger.error("❌ Aucun point valide.")
+            return None
+        
+        df = pd.concat(records, ignore_index=True)
+        
         if output_csv is None:
-            output_csv = self.output_dir / f"persiann_{self.product}_data.csv"
+            output_csv = self.output_dir / f"persiann_{self.product}_points.csv"
         else:
             output_csv = Path(output_csv)
         
         df.to_csv(output_csv, index=False)
         self.logger.info(f"💾 CSV sauvegardé : {output_csv}")
-        
         return df

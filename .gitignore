@@ -110,3 +110,6 @@ notebooks/logs/*
 .idea/
 
 tests/output/
+
+# Google OAuth credentials (secrets)
+client_secrets.json
