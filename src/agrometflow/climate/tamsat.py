@@ -211,47 +211,104 @@ class TamsatDownloader:
                 return None
 
     def to_csv(self, output_csv=None, points=None):
+        """
+        Extrait les données en CSV pour des points spécifiques.
+        Utilise une moyenne spatiale sur une fenêtre de ±0.10°
+        pour éviter les pixels vides.
+        """
+
+        import pandas as pd
+
         if points is None:
             self.logger.error("❌ Le CSV nécessite une liste de points (lat/lon).")
             return None
-        
-        import pandas as pd
-        
+
         nc_files = list(self.output_dir.glob(f"tamsat_{self.product}_*.nc"))
         if not nc_files:
             self.logger.error("❌ Aucun fichier NetCDF trouvé.")
             return None
-        
+
         ds = xr.open_dataset(nc_files[0])
-        
+
+        # Déterminer la variable de pluie
+        var_name = 'PR' if 'PR' in ds.data_vars else list(ds.data_vars)[0]
+        if var_name != 'PR':
+            ds = ds.rename({var_name: 'PR'})
+            self.logger.info(f"📝 Variable renommée : {var_name} → PR")
+
         records = []
+
         for point in points:
             lat = point.get("lat")
             lon = point.get("lon")
+
             if lat is None or lon is None:
                 self.logger.warning("⚠️ Point ignoré : lat/lon manquant")
                 continue
-            
-            # Déterminer le nom de la variable
-            var_name = 'PR' if 'PR' in ds.data_vars else list(ds.data_vars)[0]
-            da = ds[var_name].sel(lat=lat, lon=lon, method='nearest')
-            df_point = da.to_dataframe().reset_index()
+
+            # Fenêtre spatiale ±0.10°
+            south = lat - 0.10
+            north = lat + 0.10
+            west = lon - 0.10
+            east = lon + 0.10
+
+            # Gestion de l'ordre des latitudes
+            if ds.lat.values[0] > ds.lat.values[-1]:
+                # latitudes décroissantes
+                lat_slice = slice(north, south)
+            else:
+                # latitudes croissantes
+                lat_slice = slice(south, north)
+
+            lon_slice = slice(west, east)
+
+            self.logger.debug(
+                f"📍 Extraction autour de ({lat}, {lon}) "
+                f"lat={lat_slice}, lon={lon_slice}"
+            )
+
+            subset = ds.PR.sel(lat=lat_slice, lon=lon_slice)
+
+            # Vérifier qu'on a bien des pixels
+            if subset.size == 0:
+                self.logger.warning(
+                    f"⚠️ Aucun pixel trouvé autour de ({lat}, {lon})"
+                )
+                continue
+
+            # Moyenne spatiale (ignore les NaN)
+            mean_ts = subset.mean(dim=["lat", "lon"], skipna=True)
+
+            df_point = mean_ts.to_dataframe().reset_index()
+
+            # Ajouter les coordonnées demandées
+            df_point["lat"] = lat
+            df_point["lon"] = lon
             df_point["point"] = f"({lat}, {lon})"
+
             records.append(df_point)
-        
+
+        ds.close()
+
         if not records:
-            self.logger.error("❌ Aucun point valide.")
+            self.logger.error("❌ Aucun point valide extrait.")
             return None
-        
+
         df = pd.concat(records, ignore_index=True)
-        
+
+        # Conversion du temps
+        if "time" in df.columns:
+            df["time"] = pd.to_datetime(df["time"])
+
+        # Chemin du CSV
         if output_csv is None:
             output_csv = self.output_dir / f"tamsat_{self.product}_points.csv"
         else:
             output_csv = Path(output_csv)
-        
+
         df.to_csv(output_csv, index=False)
         self.logger.info(f"💾 CSV sauvegardé : {output_csv}")
+
         return df
     
     def extract(self, variables=None, start_date=None, end_date=None, as_long=False, **kwargs):

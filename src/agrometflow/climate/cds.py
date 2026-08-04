@@ -58,9 +58,9 @@ class CDSDownloader(ClimateSource):
             exist_ok=True
         )
 
-        # =====================================================
+
         # Dataset
-        # =====================================================
+         
 
         dataset = kwargs.get(
             "dataset",
@@ -87,9 +87,9 @@ class CDSDownloader(ClimateSource):
             f"BBOX: {bbox}, Dataset: {dataset}"
         )
 
-        # =====================================================
+
         # CDS client
-        # =====================================================
+   
 
         cds_url = kwargs.get(
             "url",
@@ -111,9 +111,9 @@ class CDSDownloader(ClimateSource):
             quiet=True
         )
 
-        # =====================================================
+       
         # Nombre de workers
-        # =====================================================
+     
 
         is_notebook = _is_notebook_environment()
 
@@ -130,9 +130,9 @@ class CDSDownloader(ClimateSource):
             f"Max workers: {max_workers}"
         )
 
-        # =====================================================
+      
         # Construction des requêtes
-        # =====================================================
+      
 
         if dataset == "sis-agrometeorological-indicators":
 
@@ -168,9 +168,8 @@ class CDSDownloader(ClimateSource):
             f"Requests: {len(requests)}"
         )
 
-        # =====================================================
         # Tous les fichiers existent déjà
-        # =====================================================
+      
 
         if len(requests) == 0:
 
@@ -210,9 +209,9 @@ class CDSDownloader(ClimateSource):
 
             return result
 
-        # =====================================================
+        
         # Téléchargement
-        # =====================================================
+        
 
         result = None
 
@@ -228,9 +227,9 @@ class CDSDownloader(ClimateSource):
                 end_date=end_date
             )
 
-        # =====================================================
+       
         # Résultat
-        # =====================================================
+        
 
         if points is not None and result is not None:
 
@@ -311,7 +310,7 @@ class CDSDownloader(ClimateSource):
             )
 
         return df
-    
+
 def fetch_and_merge(
     req,
     client,
@@ -326,95 +325,154 @@ def fetch_and_merge(
 
     logger.info(f"⬇️ Downloading to {zip_path}")
 
-    client.retrieve(dataset, request).download(zip_path)
+    # Téléchargement
+   
+    try:
+        client.retrieve(dataset, request).download(zip_path)
+    except Exception as e:
+        logger.error(f"❌ Échec du téléchargement : {e}")
+        return None
 
+     
     # Détection ZIP
+    
     with open(zip_path, "rb") as f:
         is_zip = (f.read(4) == b"PK\x03\x04")
 
-    # Cas fichier direct
+    ds = None
+
+  
+    # Cas ERA5 : NetCDF direct
+ 
     if not is_zip:
+
         logger.info("📄 NetCDF direct détecté")
 
-        # ✅ Ouvrir avec chunks pour éviter l'erreur mémoire
-        ds = xr.open_dataset(
-            zip_path,
-            chunks={
-                "time": 30,
-                "latitude": 100,
-                "longitude": 100
-            }
-        )
+        try:
+            ds = xr.open_dataset(
+                zip_path,
+                chunks={
+                    "time": 30,
+                    "latitude": 100,
+                    "longitude": 100
+                },
+                engine="netcdf4"
+            )
+        except Exception as e:
+            logger.error(f"❌ Erreur d'ouverture du NetCDF : {e}")
+            return None
 
         ds = _process_dataset(ds, target_var, logger)
 
-    # Cas ZIP AgERA5
+ 
+    # Cas AgERA5 : ZIP contenant plusieurs NetCDF
+   
     else:
-        with tempfile.TemporaryDirectory() as tmp:
-            tmp_dir = Path(tmp)
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+
+            tmp_dir = Path(tmp_dir)
+
             logger.info(f"📦 Extraction vers {tmp_dir}")
 
-            with zipfile.ZipFile(zip_path, "r") as z:
-                z.extractall(tmp_dir)
+            try:
+                with zipfile.ZipFile(zip_path, "r") as z:
+                    z.extractall(tmp_dir)
+            except Exception as e:
+                logger.error(f"❌ Erreur d'extraction du ZIP : {e}")
+                return None
 
             nc_files = sorted(tmp_dir.glob("*.nc"))
 
             if len(nc_files) == 0:
-                raise RuntimeError("Aucun fichier NetCDF trouvé")
+                logger.error("❌ Aucun fichier NetCDF trouvé dans le ZIP")
+                return None
 
             logger.info(f"📂 {len(nc_files)} fichiers NetCDF trouvés")
 
-            # ✅ Ouvrir avec chunks pour les fichiers multiples
-            ds = xr.open_mfdataset(
-                nc_files,
-                combine="nested",
-                concat_dim="time",
-                parallel=False,
-                chunks={"time": 30, "lat": 100, "lon": 100}
-            )
+            # ✅ Version robuste (fichier par fichier)
+            try:
+                datasets = []
+                for f in nc_files:
+                    with xr.open_dataset(f, engine="netcdf4") as d:
+                        datasets.append(d.load())
+                ds = xr.concat(datasets, dim="time")
+                ds = ds.sortby("time")
+            except Exception as e:
+                logger.error(f"❌ Erreur de fusion des NetCDF : {e}")
+                return None
 
-            ds.load()
-            ds = ds.sortby("time")
             ds = _process_dataset(ds, target_var, logger)
 
+            # ✅ Le Dataset est maintenant chargé en mémoire
+            # → Les fichiers temporaires seront supprimés à la sortie du bloc with
+
+   
+    # Vérification de la variable
+    
+    if target_var not in ds.data_vars:
+        logger.error(f"❌ Variable '{target_var}' non trouvée dans le Dataset")
+        return None
+
     # Sauvegarde NetCDF final
-    logger.info(ds)
-
-    encoding = {
-        target_var: {
-            "zlib": True,
-            "complevel": 4,
-            "chunksizes": (
-                1,
-                min(100, ds.sizes["lat"]),
-                min(100, ds.sizes["lon"])
-            )
+ 
+    try:
+        encoding = {
+            target_var: {
+                "zlib": True,
+                "complevel": 4,
+                "chunksizes": (
+                    1,
+                    min(100, ds.sizes["lat"]),
+                    min(100, ds.sizes["lon"])
+                )
+            }
         }
-    }
 
-    ds.to_netcdf(output_file, encoding=encoding)
-    logger.info(f"💾 Saved : {output_file}")
+        ds.to_netcdf(output_file, encoding=encoding)
+        logger.info(f"💾 Saved : {output_file}")
+    except Exception as e:
+        logger.error(f"❌ Erreur de sauvegarde : {e}")
+        return None
 
     ds.close()
 
+ 
     # Nettoyage ZIP
+    
     try:
         os.remove(zip_path)
         logger.info("🗑️ ZIP supprimé")
     except Exception:
         pass
 
-    # Extraction points
+    # =====================================================
+    # Extraction des points
+    # =====================================================
     if points is not None:
-        with xr.open_dataset(output_file) as ds_out:
-            return _extract_points(
-                ds_out,
-                points,
-                target_var,
-                logger,
-                start_date,
-                end_date
-            )
+
+        try:
+            with xr.open_dataset(
+                output_file,
+                chunks={"time": 30, "lat": 100, "lon": 100}
+            ) as ds_out:
+
+                if start_date and end_date and "time" in ds_out.coords:
+
+                    start = pd.to_datetime(start_date)
+                    end = pd.to_datetime(end_date) + pd.Timedelta(days=1) - pd.Timedelta(seconds=1)
+                    ds_out = ds_out.sel(time=slice(start, end))
+                    logger.info(f"📅 Filtrage temporel : {start} → {end}")
+
+                return _extract_points(
+                    ds_out,
+                    points,
+                    target_var,
+                    logger
+                )
+        except Exception as e:
+            logger.error(f"❌ Erreur d'extraction des points : {e}")
+            return None
 
     return None
 
@@ -467,6 +525,10 @@ def build_requests(
     end_date=None,
     years=None
 ):
+    """
+    Construit les requêtes CDS pour AgERA5 en ne demandant
+    que les dates réellement nécessaires.
+    """
 
     if logger is None:
         import logging
@@ -474,57 +536,46 @@ def build_requests(
 
     requests = []
 
-    # ✅ Déterminer les années
-    if dataset == "sis-agrometeorological-indicators":
-        if start_date is None or end_date is None:
-            raise ValueError("AgERA5 nécessite start_date et end_date")
-        years_to_process = [pd.to_datetime(start_date).year]
-    else:
-        if years is None:
-            raise ValueError("ERA5 nécessite years")
-        years_to_process = years
+    if start_date is None or end_date is None:
+        raise ValueError("AgERA5 nécessite start_date et end_date")
+
+    # Dates demandées
+    dates = pd.date_range(start=start_date, end=end_date, freq="D")
 
     for var in variables:
+
         var_name = var[0]["variable"]
         target_var = var[1]
 
         var_dir = Path(output_dir) / target_var
         var_dir.mkdir(parents=True, exist_ok=True)
 
-        for year in years_to_process:
-            zip_path = var_dir / f"agera5_{target_var}_{year}.zip"
-            nc_path = var_dir / f"agera5_{target_var}_{year}.nc"
+        year_label = f"{dates[0]:%Y}_{dates[-1]:%Y}"
 
-            if nc_path.exists():
-                logger.info(f"⏩ Fichier existant ignoré : {nc_path}")
-                continue
+        zip_path = var_dir / f"agera5_{target_var}_{year_label}.zip"
+        nc_path = var_dir / f"agera5_{target_var}_{year_label}.nc"
 
-            if dataset == "sis-agrometeorological-indicators":
-                request = {
-                    "variable": var_name,
-                    "year": [str(year)],
-                    "month": [f"{m:02}" for m in range(1, 13)],
-                    "day": [f"{d:02}" for d in range(1, 32)],
-                    "version": "2_0"
-                }
-            else:
-                request = {
-                    "product_type": ["reanalysis"],
-                    "variable": [var_name],
-                    "year": [str(year)],
-                    "month": [f"{m:02}" for m in range(1, 13)],
-                    "day": [f"{d:02}" for d in range(1, 32)],
-                    "time": ["00:00", "06:00", "12:00", "18:00"],
-                    "format": "netcdf"
-                }
+        if nc_path.exists():
+            logger.info(f"⏩ Fichier existant ignoré : {nc_path}")
+            continue
 
-            if bbox:
-                west, south, east, north = bbox
-                request["area"] = [north, west, south, east]
+        request = {
+            "variable": var_name,
+            "year": sorted(dates.strftime("%Y").unique().tolist()),
+            "month": sorted(dates.strftime("%m").unique().tolist()),
+            "day": sorted(dates.strftime("%d").unique().tolist()),
+            "version": "2_0"
+        }
 
-            requests.append(
-                (request, str(zip_path), str(nc_path), target_var)
-            )
+        if bbox:
+            west, south, east, north = bbox
+            request["area"] = [north, west, south, east]
+
+        logger.info(f"🗓️ REQUEST = {request}")
+
+        requests.append(
+            (request, str(zip_path), str(nc_path), target_var)
+        )
 
     return requests
 
