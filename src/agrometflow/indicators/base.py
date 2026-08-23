@@ -1,54 +1,165 @@
 """
-Classe de base pour les indicateurs agroclimatiques
+Classe de base pour les indicateurs agroclimatiques.
+
+Compatible :
+    - xarray.Dataset (NetCDF spatial)
+    - xarray.DataArray
+    - pandas.DataFrame (points)
 """
 
+
 from abc import ABC, abstractmethod
+
 import pandas as pd
 import xarray as xr
 
 
+
 class BaseIndicator(ABC):
+
     """
-    Classe de base pour tous les indicateurs agroclimatiques.
+    Classe mère de tous les indicateurs agroclimatiques.
     """
-    
-    def __init__(self, name, description, unit, variable="PR"):
+
+
+    def __init__(
+        self,
+        name,
+        description,
+        unit,
+        variable="PR"
+    ):
+
         self.name = name
         self.description = description
         self.unit = unit
         self.variable = variable
+
         self._config = {}
-    
-    @abstractmethod
-    def compute(self, data, **kwargs):
+
+
+
+    def compute(
+        self,
+        data,
+        **kwargs
+    ):
         """
-        Calcule l'indicateur.
-        
-        Parameters
-        ----------
-        data : pandas.DataFrame
-            Données avec colonnes : time, lat, lon, PR (ou autre)
-        **kwargs : paramètres supplémentaires
-        
-        Returns
-        -------
-        pandas.DataFrame
-            Données avec l'indicateur calculé
+        Point d'entrée unique.
+
+        Oriente automatiquement vers :
+            - xarray
+            - pandas
+        """
+
+
+        if isinstance(
+            data,
+            (xr.Dataset, xr.DataArray)
+        ):
+
+            return self.compute_xarray(
+                data,
+                **kwargs
+            )
+
+
+        elif isinstance(
+            data,
+            pd.DataFrame
+        ):
+
+            return self.compute_dataframe(
+                data,
+                **kwargs
+            )
+
+
+        else:
+
+            raise TypeError(
+                f"Type non supporté : {type(data)}"
+            )
+
+
+
+    @abstractmethod
+    def compute_xarray(
+        self,
+        data,
+        **kwargs
+    ):
+        """
+        Calcul sur données NetCDF/xarray.
         """
         pass
-    
+
+
+
+    @abstractmethod
+    def compute_dataframe(
+        self,
+        data,
+        **kwargs
+    ):
+        """
+        Calcul sur données CSV/pandas.
+        """
+        pass
+
+
+
+    def validate_variable(
+        self,
+        data
+    ):
+        """
+        Vérifie la présence de la variable climatique.
+        """
+
+
+        if isinstance(
+            data,
+            xr.Dataset
+        ):
+
+            if self.variable not in data:
+
+                raise ValueError(
+                    f"La variable {self.variable} "
+                    "est absente du Dataset"
+                )
+
+
+        elif isinstance(
+            data,
+            pd.DataFrame
+        ):
+
+            if self.variable not in data.columns:
+
+                raise ValueError(
+                    f"La colonne {self.variable} "
+                    "est absente du DataFrame"
+                )
+
+
+
     def get_config(self):
-        """Retourne la configuration de l'indicateur."""
+
         return {
+
             "name": self.name,
-            "description": self.description,
-            "unit": self.unit,
-            "variable": self.variable,
-            "config": self._config
+
+            "description":
+                self.description,
+
+            "unit":
+                self.unit,
+
+            "variable":
+                self.variable,
+
+            "config":
+                self._config
         }
-    
-    def _ensure_dataframe(self, data):
-        """Convertit en DataFrame si nécessaire."""
-        if isinstance(data, (xr.DataArray, xr.Dataset)):
-            return data.to_dataframe().reset_index()
-        return data
