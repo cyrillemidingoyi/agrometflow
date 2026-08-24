@@ -97,7 +97,7 @@ def run_pipeline(config):
     print(f"   ✅ Données chargées : {dict(ds.dims)}")
     
     # ============================================================
-    # 2. EXTRACTION DES POINTS
+    # 2. EXTRACTION DES POINTS (VERSION CORRIGÉE)
     # ============================================================
     
     print("\n📍 2. EXTRACTION DES POINTS...")
@@ -117,12 +117,18 @@ def run_pipeline(config):
         else:
             lat, lon = point
         
-        # Extraire la série temporelle
-        da = ds.PR.sel(lat=lat, lon=lon, method='nearest')
+        # ✅ CORRECTION : Utiliser isel au lieu de sel
+        # Trouver les index les plus proches
+        lat_idx = abs(ds.lat.values - lat).argmin()
+        lon_idx = abs(ds.lon.values - lon).argmin()
+        
+        # Extraire avec isel
+        da = ds.PR.isel(lat=lat_idx, lon=lon_idx)
+        da.name = 'PR'
         
         point_data[f"point_{i}"] = {
-            "lat": float(da.lat.values),
-            "lon": float(da.lon.values),
+            "lat": float(ds.lat.values[lat_idx]),
+            "lon": float(ds.lon.values[lon_idx]),
             "data": da
         }
         
@@ -135,7 +141,6 @@ def run_pipeline(config):
     print("\n📊 3. CALCUL DES INDICATEURS...")
     print("-" * 40)
     
-    # Dictionnaire des indicateurs disponibles
     indicator_classes = {
         "cumulative_rainfall": CumulativeRainfall,
         "rainy_days": RainyDays,
@@ -148,7 +153,6 @@ def run_pipeline(config):
     indicators_config = config.get("indicators", {})
     
     if not indicators_config:
-        # Indicateurs par défaut
         indicators_config = {
             "cumulative_rainfall": {"period": "monthly"},
             "rainy_days": {"threshold": 1.0},
@@ -163,16 +167,22 @@ def run_pipeline(config):
             print(f"   ⚠️ Indicateur inconnu : {indicator_name}")
             continue
         
-        # Instancier l'indicateur
-        indicator = indicator_classes[indicator_name](**params)
+        # S'assurer que 'variable' est présent
+        if "variable" not in params:
+            params["variable"] = "PR"
         
-        # Calculer pour chaque point
+        try:
+            indicator = indicator_classes[indicator_name](**params)
+        except TypeError:
+            # Certains indicateurs n'acceptent pas 'variable'
+            filtered_params = {k: v for k, v in params.items() if k != "variable"}
+            indicator = indicator_classes[indicator_name](**filtered_params)
+        
         point_results = {}
         for point_id, point_info in point_data.items():
             try:
                 result = indicator.compute(point_info["data"])
                 
-                # Extraire la valeur
                 if hasattr(result, 'values'):
                     if result.ndim == 0:
                         value = float(result.values.item())
@@ -189,7 +199,6 @@ def run_pipeline(config):
         
         results[indicator_name] = point_results
         
-        # Afficher les résultats
         for point_id, value in point_results.items():
             if value is not None:
                 print(f"   ✅ {indicator_name} ({point_id}) : {value:.2f}")
@@ -201,12 +210,8 @@ def run_pipeline(config):
     print("\n📊 4. CRÉATION DU TABLEAU FINAL...")
     print("-" * 40)
     
-    # Convertir les résultats en DataFrame
     df_results = pd.DataFrame(results).T
-    
-    # Ajouter les métadonnées
     df_results.index.name = "Indicateur"
-    
     print(df_results)
     
     # ============================================================
@@ -216,25 +221,18 @@ def run_pipeline(config):
     print("\n💾 5. SAUVEGARDE DES RÉSULTATS...")
     print("-" * 40)
     
-    # Créer le dossier de résultats
     project_name = config.get("global", {}).get("project_name", "pipeline_results")
     results_dir = Path("results") / project_name
     results_dir.mkdir(parents=True, exist_ok=True)
     
-    # Sauvegarder le DataFrame
     csv_path = results_dir / "indicators_results.csv"
     df_results.to_csv(csv_path)
     print(f"   ✅ CSV sauvegardé : {csv_path}")
     
-    # Sauvegarder la configuration
     config_path = results_dir / "config.yml"
     with open(config_path, 'w') as f:
         yaml.dump(config, f, default_flow_style=False)
     print(f"   ✅ Configuration sauvegardée : {config_path}")
-    
-    # ============================================================
-    # 6. RÉSUMÉ
-    # ============================================================
     
     print("\n" + "=" * 60)
     print("✅ PIPELINE TERMINÉ")
