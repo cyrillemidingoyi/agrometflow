@@ -33,7 +33,7 @@ def _is_notebook_environment():
 
 
 class ChirpsDownloader(ClimateSource):
-    def __init__(self, log_file=None, verbose=False):
+    def __init__(self, product="chirps", log_file=None, verbose=False):
         self.logger = get_logger(__name__, log_file=log_file, verbose=verbose)
         self.data = None
 
@@ -54,7 +54,7 @@ class ChirpsDownloader(ClimateSource):
         except KeyError as e:
             raise ValueError(f"Missing required argument: {e}")
 
-        variables = _normalize_variables(kwargs.get("variables", [DEFAULT_TARGET_VAR]))
+        variables = kwargs.get("variables")[0] #_normalize_variables(kwargs.get("variables", [DEFAULT_TARGET_VAR]))
         bbox = kwargs.get("bbox")
         points = kwargs.get("points") or kwargs.get("multipoints")
         timeout = kwargs.get("timeout", 180)
@@ -197,8 +197,7 @@ def build_requests(years, output_dir, variables, bbox=None):
         "products/CHIRPS-2.0/"
         "global_daily/netcdf/p05"
     )
-
-    for source_var, target_var in variables:
+    for source_var, target_var in variables.items():
 
         var_dir = Path(output_dir) / target_var
         var_dir.mkdir(parents=True, exist_ok=True)
@@ -428,7 +427,7 @@ def _extract_points_subset_from_file(
                 lon = point["lon"]
                 lat = point["lat"]
             else:
-                lon, lat = point
+                lat, lon = point
 
             logger.info(f"📍 Extraction CHIRPS pour lon={lon}, lat={lat}")
 
@@ -437,13 +436,13 @@ def _extract_points_subset_from_file(
                 lat_slice = slice(lat - 0.10, lat + 0.10)
                 lon_slice = slice(lon - 0.10, lon + 0.10)
                 
-                subset = ds[source_var].sel(lat=lat_slice, lon=lon_slice)
+                subset = ds[target_var].sel(lat=lat_slice, lon=lon_slice)
                 
                 # ✅ Moyenne spatiale (ignore les NaN)
                 mean_ts = subset.mean(dim=["lat", "lon"], skipna=True)
                 
                 # ✅ Convertir en DataFrame
-                df = mean_ts.to_dataframe(name=target_var).reset_index()
+                df = mean_ts.to_dataframe(name=source_var).reset_index()
                 
                 # ✅ Ajouter les coordonnées du point
                 df["lon"] = lon
@@ -565,6 +564,7 @@ def _merge_frames_by_var(frames_by_var):
 
 def _normalize_variables(variables):
     normalized = []
+    print(f"normalizing variables: {variables}", flush=True)
     for item in variables:
         if isinstance(item, (list, tuple)) and len(item) == 2:
             source_var, target_var = item

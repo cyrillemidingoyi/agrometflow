@@ -217,13 +217,13 @@ metadata = {
                 "chirps": {
                     "sources": {
                         "chirps": {
-                                "name": "PR",
+                                "name": "precip",
                                 "unit": "mm/day",
                                 "description": "Total daily precipitation",
                                 "resolution": "0.05*0.05"
                         },
                         "chc_ucsb_ftp": {
-                                "name": "PR",
+                                "name": "precip",
                                 "unit": "mm/day",
                                 "description": "Total daily precipitation",
                                 "resolution": "0.05*0.05"
