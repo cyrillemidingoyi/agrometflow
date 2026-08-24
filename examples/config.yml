@@ -46,3 +46,14 @@ climate:
 #   bbox: [-17.0, 10.0, -16.0, 11.0]
 #   resolution: 250
 #   output_dir: "data/soil/soilgrids"
+
+
+# indicators:
+#   inputs  : "custom"  # peut ne pas être déclaré
+#   output_dir: "data/indicators"
+#   functions:
+#     cumulative_precipitation:
+#       threshold: 1
+#     sspi
+
+#       
