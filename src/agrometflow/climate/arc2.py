@@ -41,7 +41,7 @@ class Arc2Downloader:
             # Vérifier si le fichier existe (HEAD request)
             head_response = requests.head(url, timeout=10)
             if head_response.status_code == 404:
-                self.logger.warning(f"⚠️ Fichier non trouvé pour {date.strftime('%Y-%m-%d')}. Ignoré.")
+                self.logger.warning(f"Fichier non trouvé pour {date.strftime('%Y-%m-%d')}. Ignoré.")
                 return None
             
             self.logger.debug(f"⬇ Downloading {url}")
@@ -52,7 +52,7 @@ class Arc2Downloader:
             return tif_path
         except requests.exceptions.HTTPError as e:
             if e.response.status_code == 404:
-                self.logger.warning(f"⚠️ Fichier non trouvé pour {date.strftime('%Y-%m-%d')}. Ignoré.")
+                self.logger.warning(f"Fichier non trouvé pour {date.strftime('%Y-%m-%d')}. Ignoré.")
                 return None
             else:
                 self.logger.warning(f"Failed for {zip_name}: {e}")
@@ -76,7 +76,7 @@ class Arc2Downloader:
                     ds = rioxarray.open_rasterio(tif_file)
                     ds = ds.squeeze("band", drop=True)
                     
-                    # ✅ AJOUT : Découpage spatial (bbox)
+                    # AJOUT : Découpage spatial (bbox)
                     if hasattr(self, 'bbox') and self.bbox is not None:
                         south, north, west, east = self.bbox
                         # Les coordonnées sont dans le système de la grille
@@ -95,22 +95,22 @@ class Arc2Downloader:
                             y_slice = slice(south, north)  # si les y sont croissants
                         
                         ds = ds.sel(x=x_slice, y=y_slice)
-                        self.logger.info(f"📦 Découpage spatial appliqué : {self.bbox}")
+                        self.logger.info(f"Découpage spatial appliqué : {self.bbox}")
                         self.logger.info(f"   Dimensions après découpage : {ds.dims}")
                     
                     ds = ds.expand_dims(time=[timestamp])
                     datasets.append(ds)
                 except Exception as e:
-                    self.logger.error(f"❌ Failed to read {tif_file.name}: {e}")
+                    self.logger.error(f"Failed to read {tif_file.name}: {e}")
 
             if datasets:
                 try:
                     merged = xr.concat(datasets, dim="time")
-                    merged.name = "PR"  # ✅ Standardisation en PR
+                    merged.name = "PR"  # Standardisation en PR
                     merged.to_netcdf(output_nc)
-                    self.logger.info(f"🎯 Yearly NetCDF saved: {output_nc}")
+                    self.logger.info(f"Yearly NetCDF saved: {output_nc}")
                 except Exception as e:
-                    self.logger.error(f"❌ Merge failed for {year}: {e}")
+                    self.logger.error(f"Merge failed for {year}: {e}")
 
     def download(self, start_date, end_date, output_dir=None, bbox=None, points=None, **kwargs):
         if output_dir is None:
@@ -121,23 +121,23 @@ class Arc2Downloader:
         output_dir = Path(output_dir) / "PR"
         max_workers = kwargs.get("max_workers", 6)
         
-        # ✅ Vérification des dates de disponibilité
+        # Vérification des dates de disponibilité
         AVAILABLE_FROM = "1983-01-01"
         AVAILABLE_TO = "present"
         
         start = self._parse_date(start_date)
         if start < datetime.strptime(AVAILABLE_FROM, "%Y-%m-%d"):
             raise ValueError(
-                f"❌ ARC2 n'est pas disponible avant le {AVAILABLE_FROM}. "
+                f"ARC2 n'est pas disponible avant le {AVAILABLE_FROM}. "
                 f"Vous avez demandé à partir du {start_date}."
             )
         
-        # ✅ Stockage du bbox
+        # Stockage du bbox
         self.bbox = bbox
         if bbox is not None:
-            self.logger.info(f"📦 Découpage spatial appliqué : {bbox}")
+            self.logger.info(f"Découpage spatial appliqué : {bbox}")
         else:
-            self.logger.info("🌍 Aucun découpage spatial : données globales")
+            self.logger.info("Aucun découpage spatial : données globales")
         
         Path(output_dir).mkdir(parents=True, exist_ok=True)
         
@@ -165,7 +165,7 @@ class Arc2Downloader:
 
         # Si des points sont demandés → CSV direct
         if points is not None:
-            self.logger.info("📊 Extraction des points en CSV...")
+            self.logger.info("Extraction des points en CSV...")
             nc_files = list(Path(output_dir).glob("*.nc"))
             if not nc_files:
                 nc_files = list(Path(output_dir).glob("PR/*.nc"))
@@ -174,7 +174,7 @@ class Arc2Downloader:
                 ds = xr.open_dataset(nc_files[0])
                 return self.to_csv(points=points)
             else:
-                self.logger.error("❌ NetCDF non trouvé")
+                self.logger.error("NetCDF non trouvé")
                 return None
 
     def _daterange(self, start, end):
@@ -198,13 +198,13 @@ class Arc2Downloader:
         pandas.DataFrame or None
         """
         if points is None:
-            self.logger.error("❌ Le CSV nécessite une liste de points (lat/lon).")
+            self.logger.error(" Le CSV nécessite une liste de points (lat/lon).")
             return None
         
         # Charger le fichier NetCDF
         nc_files = list(self.output_dir.glob("PR/*.nc"))
         if not nc_files:
-            self.logger.error("❌ Aucun fichier NetCDF trouvé.")
+            self.logger.error("Aucun fichier NetCDF trouvé.")
             return None
         
         ds = xr.open_dataset(nc_files[0])
@@ -217,7 +217,7 @@ class Arc2Downloader:
             lat = point.get("lat")
             lon = point.get("lon")
             if lat is None or lon is None:
-                self.logger.warning("⚠️ Point ignoré : lat/lon manquant")
+                self.logger.warning("Point ignoré : lat/lon manquant")
                 continue
             
             # Sélectionner le point le plus proche
@@ -227,7 +227,7 @@ class Arc2Downloader:
             records.append(df_point)
         
         if not records:
-            self.logger.error("❌ Aucun point valide.")
+            self.logger.error("Aucun point valide.")
             return None
         
         df = pd.concat(records, ignore_index=True)
@@ -238,5 +238,5 @@ class Arc2Downloader:
             output_csv = Path(output_csv)
         
         df.to_csv(output_csv, index=False)
-        self.logger.info(f"💾 CSV sauvegardé : {output_csv}")
+        self.logger.info(f"CSV sauvegardé : {output_csv}")
         return df

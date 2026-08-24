@@ -253,7 +253,7 @@ metadata = {
                 "persiann": {
                     "sources": {
                         "chrs_ftp": {                    
-                                "name": "PR",
+                                "name": "precip",
                                 "unit": "mm/day",
                                 "description": "Total daily precipitation",
                                 "resolution": "0.05*0.05"
@@ -263,7 +263,7 @@ metadata = {
                 "persiann_ccs": {
                     "sources": {
                         "chrs_ftp": {
-                            "name": "PR",
+                            "name": "precip",
                             "unit": "mm/day",
                             "description": "Total daily precipitation (PERSIANN-CCS)",
                             "resolution": "0.04*0.04"
@@ -273,7 +273,7 @@ metadata = {
                 "persiann_cdr": {
                     "sources": {
                         "chrs_ftp": {
-                            "name": "PR",
+                            "name": "precip",
                             "unit": "mm/day",
                             "description": "Total daily precipitation (PERSIANN-CDR)",
                             "resolution": "0.25*0.25"
@@ -283,7 +283,7 @@ metadata = {
                 "persiann_ccs_cdr_v2_b1": {
                     "sources": {
                         "chrs_ftp": {
-                            "name": "PR",
+                            "name": "precip",
                             "unit": "mm/day",
                             "description": "Total daily precipitation (PERSIANN-CCS-CDR V2 B1)",
                             "resolution": "0.04*0.04"
@@ -293,7 +293,7 @@ metadata = {
                 "persiann_ccs_cdr_v2_cpc": {
                     "sources": {
                         "chrs_ftp": {
-                            "name": "PR",
+                            "name": "precip",
                             "unit": "mm/day",
                             "description": "Total daily precipitation (PERSIANN-CCS-CDR V2 CPC)",
                             "resolution": "0.04*0.04"
@@ -303,7 +303,7 @@ metadata = {
                 "pdirnow": {
                     "sources": {
                         "chrs_ftp": {
-                            "name": "PR",
+                            "name": "precip",
                             "unit": "mm/day",
                             "description": "Total daily precipitation (PDIR-Now)",
                             "resolution": "0.04*0.04"

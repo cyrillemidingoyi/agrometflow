@@ -89,6 +89,17 @@ def run_pipeline(config):
         logger.info(f"Projections source: {projections_cfg.get('source', 'default')}")
         downloader = get_projection_source(source, log_file=log_file, verbose=verbose)
         downloader.download(**projections_cfg)
+    
+    if "indicators" in config:
+        indicators_cfg = config["indicators"]
+        # en 
+        pass
+    
+    if "metrics" in config:
+        pass
+    
+    if "optimal_source" in config:
+        pass
 
     return results
 

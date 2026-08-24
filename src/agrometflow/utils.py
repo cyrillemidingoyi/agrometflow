@@ -63,7 +63,7 @@ def resolve_variables(source, product, variables, logger=None):
                 logger.error(msg)
             raise ValueError(msg)
 
-        resolved.append([metadata[var_type][var]["products"][product]["sources"][source]["name"], var])
+        resolved.append({var : metadata[var_type][var]["products"][product]["sources"][source]["name"]})
     return resolved
 
 def split_yearly(ncfile, output_dir=None):

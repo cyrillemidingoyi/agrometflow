@@ -218,6 +218,7 @@ class PersiannDownloader:
         self.raw_dir = self.output_dir / "bin"
         self.raw_dir.mkdir(parents=True, exist_ok=True)
         self.max_workers = max_workers
+        self.var_name = None
         
         # Initialiser le logger
         self.logger = get_logger(f"agrometflow.persiann.{product}", log_file=log_file, verbose=verbose)
@@ -508,6 +509,7 @@ class PersiannDownloader:
 
         available_from = self.config.get("available_from")
         available_to = self.config.get("available_to")
+        self.var_name = kwargs["variables"][0]["PR"]
 
         if available_from:
             from_date = datetime.strptime(available_from, "%Y-%m-%d")
@@ -697,26 +699,15 @@ class PersiannDownloader:
         ds = xr.open_dataset(nc_files[0])
 
         # Trouver et renommer la variable de précipitation
-        var_name = None
-        for possible in ['precip', 'precipitation', 'PR', 'rainfall', 'rfe']:
-            if possible in ds.data_vars:
-                var_name = possible
-                break
+        var_name = self.var_name
         
-        if var_name is None:
-            # Si aucune variable standard n'est trouvée, prendre la première
-            var_name = list(ds.data_vars)[0]
-            self.logger.warning(f"⚠️ Variable inconnue : {var_name}")
-        
-        # Renommer si nécessaire
-        if var_name != 'PR':
-            ds = ds.rename({var_name: 'PR'})
-            self.logger.info(f"📝 Variable renommée : {var_name} → PR")
+        ds = ds.rename({var_name: 'PR'})
+        self.logger.info(f"📝 Variable renommée : {var_name} → PR")
         
         records = []
         for point in points:
-            lat = point.get("lat")
-            lon = point.get("lon")
+            lat = point[0]
+            lon = point[1]
             if lat is None or lon is None:
                 self.logger.warning("⚠️ Point ignoré : lat/lon manquant")
                 continue
