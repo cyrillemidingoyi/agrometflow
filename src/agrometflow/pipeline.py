@@ -1,3 +1,8 @@
+from pathlib import Path
+
+import pandas as pd
+import xarray as xr
+
 from agrometflow.climate import get_climate_source
 from agrometflow.utils import get_logger
 from agrometflow.soil import get_soil_source
@@ -6,7 +11,7 @@ from agrometflow.utils import resolve_variables
 from agrometflow.utils import write_cdsapirc_from_config
 from agrometflow.projections import get_projection_source
 
-
+from agrometflow.indicators import get_indicator
 
 def run_pipeline(config):
     """
@@ -90,34 +95,260 @@ def run_pipeline(config):
         downloader = get_projection_source(source, log_file=log_file, verbose=verbose)
         downloader.download(**projections_cfg)
     
+    # Process indicators block if present
     if "indicators" in config:
         indicators_cfg = config["indicators"]
-        # en 
-        pass
-    
+
+        logger.info("Starting indicators computation.")
+
+        # 1. RÉCUPÉRATION DES DONNÉES D'ENTRÉE
+
+        climate_data = None
+        input_file = indicators_cfg.get("input")
+
+        # Fichier fourni directement par l'utilisateur
+
+        if input_file:
+            input_path = Path(input_file)
+
+            logger.info(
+                f"Loading custom input data: {input_path}"
+            )
+
+            if not input_path.exists():
+                raise FileNotFoundError(
+                    f"Input file not found: {input_path}"
+                )
+
+            suffix = input_path.suffix.lower()
+
+            # NetCDF : données spatiales
+            if suffix in {".nc", ".nc4"}:
+                climate_data = xr.open_dataset(input_path)
+
+                logger.info(
+                    "Custom NetCDF data loaded."
+                )
+
+            # CSV : données ponctuelles
+            elif suffix == ".csv":
+                climate_data = pd.read_csv(input_path)
+
+                if "time" in climate_data.columns:
+                    climate_data["time"] = pd.to_datetime(
+                        climate_data["time"]
+                    )
+
+                logger.info(
+                    "Custom CSV data loaded."
+                )
+
+            else:
+                raise ValueError(
+                    f"Unsupported input format: {suffix}. "
+                    f"Supported formats are .nc, .nc4 and .csv."
+                )
+
+        # Sinon : données produites par le bloc climate
+
+        else:
+            climate_data = results.get("climate")
+
+            if climate_data is not None:
+                logger.info(
+                    "Using pipeline climate data for indicators."
+                )
+
+        # 2. VÉRIFICATION DES DONNÉES
+
+        if climate_data is None:
+            logger.error(
+                "No climate data available for indicators."
+            )
+
+            results["indicators"] = {
+                "data": {},
+                "metadata": {
+                    "input": (
+                        str(input_file)
+                        if input_file
+                        else "pipeline"
+                    ),
+                    "n_indicators": 0,
+                },
+            }
+
+        else:
+            # 3. CONFIGURATION
+
+            functions = indicators_cfg.get(
+                "functions",
+                {}
+            )
+
+            indicators_results = {}
+
+            output_dir = Path(
+                indicators_cfg.get(
+                    "output_dir",
+                    "data/indicators"
+                )
+            )
+
+            output_dir.mkdir(
+                parents=True,
+                exist_ok=True
+            )
+
+            if not functions:
+                logger.warning(
+                    "No indicator functions specified."
+                )
+
+            # 4. CALCUL DES INDICATEURS
+
+            for indicator_name, params in functions.items():
+
+                # Copie des paramètres pour ne pas modifier config
+                params = params.copy() if params else {}
+
+                logger.info(
+                    f"Computing indicator: "
+                    f"{indicator_name} "
+                    f"(params: {params})"
+                )
+
+                try:
+                    # Récupération de la classe depuis le registre
+                    indicator_class = get_indicator(
+                        indicator_name
+                    )
+
+                    # Création de l'indicateur
+                    indicator = indicator_class(
+                        **params
+                    )
+
+                    # Calcul
+                    result = indicator.compute(
+                        climate_data
+                    )
+
+                    # Stockage en mémoire
+                    indicators_results[
+                        indicator_name
+                    ] = result
+
+                    # 5. SAUVEGARDE DU RÉSULTAT
+
+                    try:
+                        # Résultat spatial
+                        if isinstance(
+                            result,
+                            (xr.Dataset, xr.DataArray)
+                        ):
+                            output_path = (
+                                output_dir
+                                / f"{indicator_name}.nc"
+                            )
+
+                            result.to_netcdf(
+                                output_path
+                            )
+
+                            logger.info(
+                                f"Indicator saved: "
+                                f"{output_path}"
+                            )
+
+                        # Résultat ponctuel
+                        elif isinstance(
+                            result,
+                            pd.DataFrame
+                        ):
+                            output_path = (
+                                output_dir
+                                / f"{indicator_name}.csv"
+                            )
+
+                            result.to_csv(
+                                output_path,
+                                index=False
+                            )
+
+                            logger.info(
+                                f"Indicator saved: "
+                                f"{output_path}"
+                            )
+
+                    except Exception as error:
+                        logger.warning(
+                            f"Could not save "
+                            f"{indicator_name}: "
+                            f"{error}"
+                        )
+                # get_indicator() lève ValueError
+                # si le nom n'existe pas dans le registre
+                except ValueError as error:
+                    logger.warning(
+                        f"{error} Indicator skipped."
+                    )
+                    
+                except Exception as error:
+                    logger.error(
+                        f"Error computing "
+                        f"{indicator_name}: "
+                        f"{error}"
+                    )
+
+            # 6. RÉSULTATS DU PIPELINE
+
+            results["indicators"] = {
+                "data": indicators_results,
+                "metadata": {
+                    "input": (
+                        str(input_file)
+                        if input_file
+                        else "pipeline"
+                    ),
+                    "n_indicators": len(
+                        indicators_results
+                    ),
+                    "output_dir": str(
+                        output_dir
+                    ),
+                },
+            }
+
+            logger.info(
+                f"{len(indicators_results)} "
+                f"indicator(s) computed."
+            )
+        
+
     if "metrics" in config:
-        pass
-    
+            pass
+        
     if "optimal_source" in config:
-        pass
+            pass
 
     return results
 
 
 
 def run_pipeline_from_yaml(path_to_yaml):
-    """
-    Charge un fichier YAML de configuration et exécute le pipeline complet.
+        """
+        Charge un fichier YAML de configuration et exécute le pipeline complet.
 
-    Parameters
-    ----------
-    path_to_yaml : str
-        Chemin vers le fichier de configuration .yaml
+        Parameters
+        ----------
+        path_to_yaml : str
+            Chemin vers le fichier de configuration .yaml
 
-    Returns
-    -------
-    dict
-        Résultats du pipeline, structurés par source
-    """
-    config = load_config(path_to_yaml)
-    return run_pipeline(config)
+        Returns
+        -------
+        dict
+            Résultats du pipeline, structurés par source
+        """
+        config = load_config(path_to_yaml)
+        return run_pipeline(config)
