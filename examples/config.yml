@@ -57,3 +57,20 @@ climate:
 #     sspi
 
 #       
+
+indicators:
+  output_dir: "data/indicators"
+
+  functions:
+
+    cumulative_precipitation:
+      period: "monthly"
+
+    sdii:
+      threshold: 1.0
+
+    r95p:
+      percentile: 95
+
+    mean_temperature:
+      period: "monthly"
