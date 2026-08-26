@@ -33,14 +33,14 @@ class CumulativeRainfall(BaseIndicator):
 
     variable : str
         Standardized precipitation variable.
-        Default: PR
+        Default: precip
     """
 
 
     def __init__(
         self,
         period="monthly",
-        variable="PR"
+        variable="precip"
     ):
 
         super().__init__(
@@ -58,9 +58,9 @@ class CumulativeRainfall(BaseIndicator):
 
     def compute(
         self,
-        data,
-        **kwargs
+        data
     ):
+        print(f"all params cumulative {data}")
 
         if isinstance(
             data,

@@ -153,11 +153,25 @@ def run_pipeline(config):
 
         else:
             climate_data = results.get("climate")
+            print(f"climate_data from pipeline: {climate_data}")
 
             if climate_data is not None:
                 logger.info(
                     "Using pipeline climate data for indicators."
                 )
+                
+            else:
+                # get output_dir from climate block if present
+                climate_output_dir = climate_cfg.get("output_dir")
+                print(f"climate_output_dir: {climate_output_dir}")
+                # get netcdf files in the output_dir
+                nc_files = list(Path(climate_output_dir).glob("*.nc"))
+                print(f"nc_files: {nc_files}")  
+                # read first netcdf file as xarray dataset
+                climate_data = xr.open_dataset(nc_files[0])
+                print(f"climate_data: {climate_data}")
+                    
+            
 
         # 2. VÉRIFICATION DES DONNÉES
 
@@ -228,11 +242,14 @@ def run_pipeline(config):
                     indicator = indicator_class(
                         **params
                     )
+                    
+                    print(f"indicator {indicator_name} created with params {params}")
 
                     # Calcul
                     result = indicator.compute(
                         climate_data
                     )
+                    print(f"result for {indicator_name} computed: {result}")
 
                     # Stockage en mémoire
                     indicators_results[
