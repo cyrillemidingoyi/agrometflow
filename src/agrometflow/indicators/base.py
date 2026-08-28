@@ -27,7 +27,7 @@ class BaseIndicator(ABC):
         name,
         description,
         unit,
-        variable="PR"
+        variable="precip"
     ):
 
         self.name = name
