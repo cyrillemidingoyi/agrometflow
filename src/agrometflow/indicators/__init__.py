@@ -1,7 +1,6 @@
 """
 Indicateurs agroclimatiques
 """
-
 from .base import BaseIndicator
 
 # Précipitation
@@ -29,6 +28,12 @@ from .registry import (
     get_indicator,
 )
 
+# TRAITEMENT DES INDICATEURS
+
+from .utils import (
+    process_indicators,
+)
+
 __all__ = [
     'BaseIndicator',
 
@@ -50,4 +55,7 @@ __all__ = [
      # Registry
     "INDICATOR_REGISTRY",
     "get_indicator",
+
+    # Traitement
+    "process_indicators",
 ]
