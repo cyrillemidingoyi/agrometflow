@@ -31,7 +31,7 @@ def _is_notebook_environment():
         return False
 
 class CDSDownloader(ClimateSource):
-    def __init__(self, log_file=None, verbose=False):
+    def __init__(self, product=None, log_file=None, verbose=False):
         self.logger = get_logger(__name__, log_file=log_file, verbose=verbose)
         self.data = None
         self.output_dir = None
@@ -541,11 +541,14 @@ def build_requests(
 
     # Dates demandées
     dates = pd.date_range(start=start_date, end=end_date, freq="D")
+    print(f"variables = {variables}, dates = {dates}")
 
     for var in variables:
 
-        var_name = var[0]["variable"]
-        target_var = var[1]
+        #var_name = var[0]["variable"]
+        target_var = list(var.keys())[0]
+        var_name = var[target_var]["variable"]
+        print(f"target_var = {target_var}, var_name = {var_name}")
 
         var_dir = Path(output_dir) / target_var
         var_dir.mkdir(parents=True, exist_ok=True)
