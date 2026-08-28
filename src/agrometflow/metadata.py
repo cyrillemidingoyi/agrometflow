@@ -823,3 +823,40 @@ def get_sources_for_clim_variable(variable):
 
 def get_sources_for_soil_variable(variable):
     return get_sources_for_specific_variable(metadata, variable, category="soil")
+
+def get_native_variable_name(
+    variable,
+    product,
+    source
+):
+    """
+    Retourne le nom natif d'une variable climatique
+    pour un produit et une source donnés.
+
+    Exemple :
+        PR + persiann + chrs_ftp -> precip
+    """
+
+    try:
+        name = (
+            metadata["climate"]
+            [variable]
+            ["products"]
+            [product]
+            ["sources"]
+            [source]
+            ["name"]
+        )
+
+    except KeyError:
+        raise ValueError(
+            f"No metadata found for variable '{variable}', "
+            f"product '{product}' and source '{source}'."
+        )
+
+    # Certains produits, comme ERA5,
+    # stockent plusieurs informations dans un dictionnaire.
+    if isinstance(name, dict):
+        return name.get("variable")
+
+    return name
