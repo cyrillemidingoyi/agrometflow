@@ -138,6 +138,58 @@ def load_indicator_input(
 
     # 1. RECHERCHE DES CSV
 
+    csv_files = sorted(
+        list(input_dir.glob("*.csv"))
+    )
+
+    if not csv_files:
+        csv_files = sorted(
+            [
+                file
+                for file in input_dir.rglob("*.csv")
+                if not any(
+                    part.lower() == "tmp"
+                    for part in file.parts
+                )
+            ]
+        )
+
+    if csv_files:
+
+        if logger:
+            logger.info(
+                f"Loading {len(csv_files)} CSV file(s) "
+                f"from {input_dir}"
+            )
+
+        dataframes = []
+
+        for file in csv_files:
+            df = pd.read_csv(file)
+
+            if "time" in df.columns:
+                df["time"] = pd.to_datetime(df["time"])
+
+            dataframes.append(df)
+
+        data = pd.concat(
+            dataframes,
+            ignore_index=True
+        )
+
+        data = standardize_variables(
+            data=data,
+            variables=variables,
+            product=product,
+            source=source,
+            logger=logger
+        )
+
+        return data
+
+
+    # 2. RECHERCHE DES NETCDF
+
     # Chercher d'abord uniquement les fichiers directement
     # présents dans le dossier principal.
     nc_files = sorted(
@@ -170,20 +222,17 @@ def load_indicator_input(
                 f"from {input_dir}"
             )
 
-        # Un seul NetCDF
         if len(nc_files) == 1:
             data = xr.open_dataset(
                 nc_files[0]
             )
 
-        # Plusieurs NetCDF
         else:
             data = xr.open_mfdataset(
                 nc_files,
                 combine="by_coords"
             )
 
-        # Standardisation des noms de variables
         data = standardize_variables(
             data=data,
             variables=variables,
@@ -193,6 +242,7 @@ def load_indicator_input(
         )
 
         return data
+
 
     # Aucun fichier exploitable
     raise FileNotFoundError(
